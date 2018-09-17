@@ -4,5 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#F44336</color>
     <color name="colorNavText">#FFFFFF</color>
+    <color name="colorNoteMain">#FFFFFF</color>
+    <color name="colorNoteBackground">#E2E2E2</color>
     <color name="nav_default">#000000</color>
 </resources>

@@ -1,9 +1,23 @@
-package com.kokutouda.dnote.dnote;
+package com.kokutouda.dnote.dnote.ui;
 
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.persistence.room.Room;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.util.Log;
+import android.support.v4.app.NavUtils;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -13,31 +27,53 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewConfiguration;
+
+import com.kokutouda.dnote.dnote.R;
+import com.kokutouda.dnote.dnote.db.Notes;
+import com.kokutouda.dnote.dnote.db.NotesDatabase;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private NotesDatabase mNotesDb;
+    private RecyclerView mRecyclerView;
+    private Context mContext;
+    private ArrayList<Notes> mNotes;
+    private NotesAdapter mAdapter;
+    private Handler mHandler;
+
+    public static final int TASK_COMPETE = 11;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mContext = this;
         initView();
+        initData();
     }
 
     public void initView() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //fab
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
+                Intent intent = new Intent(mContext, NotesActivity.class);
+//                intent.putExtra(NotesActivity.KEY, NotesActivity.TYPE_ADD);
+                MainActivity.this.startActivityForResult(intent, NotesActivity.ADD_NOTES_REQUEST);
+
             }
         });
 
+        //drawer
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -46,6 +82,46 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //RecyclerView
+        mRecyclerView = findViewById(R.id.recyclerView);
+    }
+
+    public void initData() {
+        mNotesDb = Room.databaseBuilder(getApplicationContext(), NotesDatabase.class, NotesDatabase.DB_NAME).build();
+        mNotes = new ArrayList<>();
+        mHandler = new Handler();
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        mAdapter = new NotesAdapter(mNotes);
+        mRecyclerView.setAdapter(mAdapter);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
+        if (requestCode == NotesActivity.ADD_NOTES_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Notes note = new Notes();
+                        note.title = data.getStringExtra(NotesActivity.KEY_TITLE);
+                        note.content = data.getStringExtra(NotesActivity.KEY_CONTENT);
+                        mNotesDb.noteDao().insertNotes(note);
+                        mNotes.add(note);
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
+                }).start();
+
+            }
+
+        }
     }
 
     @Override
@@ -56,16 +132,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        float GESTURE_THRESHOLD_DP = ViewConfiguration.get(this).getScaledTouchSlop();
-        float scaleFactor = getResources().getDisplayMetrics().density;
-        int threshold = (int) (GESTURE_THRESHOLD_DP * scaleFactor + 0.5);
-        Log.d("densities", "slop: " + GESTURE_THRESHOLD_DP);
-        Log.d("densities", "threshold: " + threshold);
     }
 
     @Override
@@ -84,6 +150,10 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        if (id == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
             return true;
         }
 
@@ -109,4 +179,5 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 }
