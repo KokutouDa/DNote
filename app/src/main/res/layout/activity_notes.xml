@@ -13,19 +13,20 @@
         android:id="@+id/editTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="4dp"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="5dp"
+        android:layout_margin="@dimen/item_content_margin"
         android:background="@color/colorNoteMain"
         android:hint="@string/all_title"
         android:inputType="textPersonName"
+        android:paddingStart="@dimen/item_content_padding_horizontal"
+        android:paddingLeft="@dimen/item_content_padding_horizontal"
+        android:paddingRight="@dimen/item_content_padding_horizontal"
+        android:paddingTop="@dimen/item_content_padding_vertical"
+        android:paddingBottom="@dimen/item_content_padding_vertical"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:elevation="@dimen/elevation_notes_box"/>
 
     <EditText
         android:id="@+id/editContent"
@@ -36,11 +37,12 @@
         android:gravity="start"
         android:hint="@string/all_content"
         android:inputType="none"
-        android:padding="10dp"
+        android:padding="@dimen/item_content_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/editTitle"
+        android:elevation="@dimen/elevation_notes_box"/>
 
 
 </android.support.constraint.ConstraintLayout>

@@ -22,13 +22,21 @@ public class NotesAdapter extends RecyclerView.Adapter {
     }
 
     public static class NotesViewHolder extends RecyclerView.ViewHolder {
-        public TextView mTitleText;
-        public TextView mContentText;
+        private final TextView mTitleText;
+        private final TextView mContentText;
 
         public NotesViewHolder(View item) {
             super(item);
             mTitleText = item.findViewById(R.id.text_title);
             mContentText = item.findViewById(R.id.text_content);
+        }
+
+        public TextView getTitleText() {
+            return mTitleText;
+        }
+
+        public TextView getContentText() {
+            return mContentText;
         }
     }
 
@@ -45,8 +53,8 @@ public class NotesAdapter extends RecyclerView.Adapter {
         NotesViewHolder viewHolder = (NotesViewHolder) holder;
         Notes note = notes.get(position);
 
-        viewHolder.mTitleText.setText(note.title);
-        viewHolder.mContentText.setText(note.content);
+        viewHolder.getTitleText().setText(note.title);
+        viewHolder.getContentText().setText(note.content);
     }
 
     @Override

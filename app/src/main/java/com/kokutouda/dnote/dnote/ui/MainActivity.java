@@ -18,6 +18,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -85,13 +86,19 @@ public class MainActivity extends AppCompatActivity
 
         //RecyclerView
         mRecyclerView = findViewById(R.id.recyclerView);
+        mRecyclerView.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
+            @Override
+            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+
+                super.onTouchEvent(rv, e);
+            }
+        });
     }
 
     public void initData() {
         mNotesDb = Room.databaseBuilder(getApplicationContext(), NotesDatabase.class, NotesDatabase.DB_NAME).build();
         mNotes = new ArrayList<>();
         mHandler = new Handler();
-
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mAdapter = new NotesAdapter(mNotes);
         mRecyclerView.setAdapter(mAdapter);
