@@ -1,18 +1,10 @@
 package com.kokutouda.dnote.dnote.ui;
 
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.persistence.room.Room;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
@@ -31,22 +23,17 @@ import android.view.MenuItem;
 
 import com.kokutouda.dnote.dnote.R;
 import com.kokutouda.dnote.dnote.db.Notes;
-import com.kokutouda.dnote.dnote.db.NotesDatabase;
+import com.kokutouda.dnote.dnote.viewmodel.NotesListViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private NotesDatabase mNotesDb;
     private RecyclerView mRecyclerView;
     private Context mContext;
-    private ArrayList<Notes> mNotes;
     private NotesAdapter mAdapter;
-    private Handler mHandler;
-
-    public static final int TASK_COMPETE = 11;
+    private NotesListViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,11 +53,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Intent intent = new Intent(mContext, NotesActivity.class);
-//                intent.putExtra(NotesActivity.KEY, NotesActivity.TYPE_ADD);
-                MainActivity.this.startActivityForResult(intent, NotesActivity.ADD_NOTES_REQUEST);
-
+                startNotesAtyForResult(NotesActivity.POSITION_NEW_NOTES);
             }
         });
 
@@ -86,21 +69,49 @@ public class MainActivity extends AppCompatActivity
 
         //RecyclerView
         mRecyclerView = findViewById(R.id.recyclerView);
-        mRecyclerView.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
+        mRecyclerView.addOnItemTouchListener(new NotesListOnItemTouchListener(new NotesListOnItemTouchListener.OnItemClickListener() {
             @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-                super.onTouchEvent(rv, e);
+            public void onItemClick(View v) {
+                int position = mRecyclerView.findContainingViewHolder(v).getAdapterPosition();
+                startNotesAtyForResult(position);
+//                return true;
             }
-        });
+        }));
+//        mRecyclerView.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
+//            @Override
+//            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+//                if (e.getAction() == MotionEvent.ACTION_UP) {
+////                    mRecyclerView.getChildLayoutPosition();
+//                    View itemView = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
+//                    if (itemView != null) {
+//
+//                        int position = mRecyclerView.findContainingViewHolder(itemView).getAdapterPosition();
+//                        startNotesAtyForResult(position);
+//                        return true;
+//                    }
+//                };
+//                return false;
+//
+//            }
+//
+//            @Override
+//            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+//                super.onTouchEvent(rv, e);
+//            }
+//        });
     }
 
     public void initData() {
-        mNotesDb = Room.databaseBuilder(getApplicationContext(), NotesDatabase.class, NotesDatabase.DB_NAME).build();
-        mNotes = new ArrayList<>();
-        mHandler = new Handler();
+        mViewModel = ViewModelProviders.of(this).get(NotesListViewModel.class);
+        mViewModel.getAll().observe(this, new Observer<List<Notes>>() {
+            @Override
+            public void onChanged(@Nullable List<Notes> notes) {
+                mAdapter.setNotes(notes);
+            }
+        });
+
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        mAdapter = new NotesAdapter(mNotes);
+        mAdapter = new NotesAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
     }
@@ -109,25 +120,15 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         if (requestCode == NotesActivity.ADD_NOTES_REQUEST) {
             if (resultCode == RESULT_OK) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Notes note = new Notes();
-                        note.title = data.getStringExtra(NotesActivity.KEY_TITLE);
-                        note.content = data.getStringExtra(NotesActivity.KEY_CONTENT);
-                        mNotesDb.noteDao().insertNotes(note);
-                        mNotes.add(note);
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    }
-                }).start();
+                int position = data.getIntExtra(NotesActivity.KEY_POSITION, NotesActivity.POSITION_EXISTED_NOTES);
+                Notes notes = (Notes) data.getSerializableExtra("notes");
 
+                if (position == NotesActivity.POSITION_NEW_NOTES) {
+                    mViewModel.insertNotes(notes);
+                } else {
+                    mViewModel.updateNotes(notes);
+                }
             }
-
         }
     }
 
@@ -185,6 +186,22 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /**
+     *
+     * @param position -1时表示新数据
+     */
+    private void startNotesAtyForResult(int position) {
+        Intent intent = new Intent(mContext, NotesActivity.class);
+        if (position != NotesActivity.POSITION_NEW_NOTES) {
+
+            Notes note = mAdapter.getNotesByPosition(position);
+            intent.putExtra(NotesActivity.KEY_NOTES, note);
+        }
+        startActivityForResult(intent, NotesActivity.ADD_NOTES_REQUEST);
+
+
     }
 
 }

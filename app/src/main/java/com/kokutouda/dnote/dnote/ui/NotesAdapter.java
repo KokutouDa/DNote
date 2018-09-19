@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.kokutouda.dnote.dnote.R;
@@ -17,26 +18,16 @@ public class NotesAdapter extends RecyclerView.Adapter {
 
     private List<Notes> notes;
 
-    public NotesAdapter(List<Notes> notes) {
-        this.notes = notes;
-    }
+    public NotesAdapter() { }
 
-    public static class NotesViewHolder extends RecyclerView.ViewHolder {
-        private final TextView mTitleText;
-        private final TextView mContentText;
+    private static class NotesViewHolder extends RecyclerView.ViewHolder {
+        private TextView mTitleText;
+        private TextView mContentText;
 
-        public NotesViewHolder(View item) {
+        NotesViewHolder(View item) {
             super(item);
             mTitleText = item.findViewById(R.id.text_title);
             mContentText = item.findViewById(R.id.text_content);
-        }
-
-        public TextView getTitleText() {
-            return mTitleText;
-        }
-
-        public TextView getContentText() {
-            return mContentText;
         }
     }
 
@@ -52,9 +43,17 @@ public class NotesAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         NotesViewHolder viewHolder = (NotesViewHolder) holder;
         Notes note = notes.get(position);
+        viewHolder.mTitleText.setText(note.title);
+        viewHolder.mContentText.setText(note.content);
+    }
 
-        viewHolder.getTitleText().setText(note.title);
-        viewHolder.getContentText().setText(note.content);
+    public void setNotes(List<Notes> notes) {
+        this.notes = notes;
+        notifyDataSetChanged();
+    }
+
+    public Notes getNotesByPosition(int position) {
+        return this.notes.get(position);
     }
 
     @Override
