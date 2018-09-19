@@ -2,11 +2,9 @@ package com.kokutouda.dnote.dnote.ui;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.kokutouda.dnote.dnote.R;
@@ -16,9 +14,16 @@ import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter {
 
-    private List<Notes> notes;
+    public interface RecyclerOnItemClickListener {
+        void onItemClick(Notes notes);
+    }
 
-    public NotesAdapter() { }
+    private List<Notes> notesList;
+    private RecyclerOnItemClickListener mListener;
+
+    public NotesAdapter(RecyclerOnItemClickListener listener) {
+        this.mListener = listener;
+    }
 
     private static class NotesViewHolder extends RecyclerView.ViewHolder {
         private TextView mTitleText;
@@ -28,6 +33,15 @@ public class NotesAdapter extends RecyclerView.Adapter {
             super(item);
             mTitleText = item.findViewById(R.id.text_title);
             mContentText = item.findViewById(R.id.text_content);
+        }
+
+        private void bind(final Notes notes, final RecyclerOnItemClickListener listener) {
+            this.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onItemClick(notes);
+                }
+            });
         }
     }
 
@@ -42,24 +56,25 @@ public class NotesAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         NotesViewHolder viewHolder = (NotesViewHolder) holder;
-        Notes note = notes.get(position);
-        viewHolder.mTitleText.setText(note.title);
-        viewHolder.mContentText.setText(note.content);
+        Notes notes = notesList.get(position);
+        viewHolder.mTitleText.setText(notes.title);
+        viewHolder.mContentText.setText(notes.content);
+        viewHolder.bind(notes, mListener);
     }
 
-    public void setNotes(List<Notes> notes) {
-        this.notes = notes;
+    public void setNotesList(List<Notes> notesList) {
+        this.notesList = notesList;
         notifyDataSetChanged();
     }
 
     public Notes getNotesByPosition(int position) {
-        return this.notes.get(position);
+        return this.notesList.get(position);
     }
 
     @Override
     public int getItemCount() {
-        if (notes != null) {
-            return notes.size();
+        if (notesList != null) {
+            return notesList.size();
         }
         return 0;
     }

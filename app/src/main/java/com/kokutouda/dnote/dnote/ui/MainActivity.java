@@ -10,7 +10,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.MotionEvent;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -69,12 +69,12 @@ public class MainActivity extends AppCompatActivity
 
         //RecyclerView
         mRecyclerView = findViewById(R.id.recyclerView);
-        mRecyclerView.addOnItemTouchListener(new NotesListOnItemTouchListener(this, new NotesListOnItemTouchListener.OnItemClickListener() {
-            @Override
-            public void onItemClick(View v, int position) {
-                startNotesAtyForResult(position);
-            }
-        }));
+//        mRecyclerView.addOnItemTouchListener(new NotesListOnItemTouchListener(this, new NotesListOnItemTouchListener.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(View v, int position) {
+//                startNotesAtyForResult(position);
+//            }
+//        }));
     }
 
     public void initData() {
@@ -82,12 +82,18 @@ public class MainActivity extends AppCompatActivity
         mViewModel.getAll().observe(this, new Observer<List<Notes>>() {
             @Override
             public void onChanged(@Nullable List<Notes> notes) {
-                mAdapter.setNotes(notes);
+                mAdapter.setNotesList(notes);
             }
         });
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        mAdapter = new NotesAdapter();
+        mAdapter = new NotesAdapter(new NotesAdapter.RecyclerOnItemClickListener() {
+            @Override
+            public void onItemClick(Notes n) {
+                Log.d("Adapter", n.title);
+
+            }
+        });
         mRecyclerView.setAdapter(mAdapter);
 
     }
