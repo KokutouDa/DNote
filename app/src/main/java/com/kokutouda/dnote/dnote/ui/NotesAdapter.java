@@ -14,16 +14,9 @@ import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter {
 
-    public interface RecyclerOnItemClickListener {
-        void onItemClick(Notes notes);
-    }
-
     private List<Notes> notesList;
-    private RecyclerOnItemClickListener mListener;
 
-    public NotesAdapter(RecyclerOnItemClickListener listener) {
-        this.mListener = listener;
-    }
+    public NotesAdapter() { }
 
     private static class NotesViewHolder extends RecyclerView.ViewHolder {
         private TextView mTitleText;
@@ -33,15 +26,6 @@ public class NotesAdapter extends RecyclerView.Adapter {
             super(item);
             mTitleText = item.findViewById(R.id.text_title);
             mContentText = item.findViewById(R.id.text_content);
-        }
-
-        private void bind(final Notes notes, final RecyclerOnItemClickListener listener) {
-            this.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onItemClick(notes);
-                }
-            });
         }
     }
 
@@ -59,7 +43,6 @@ public class NotesAdapter extends RecyclerView.Adapter {
         Notes notes = notesList.get(position);
         viewHolder.mTitleText.setText(notes.title);
         viewHolder.mContentText.setText(notes.content);
-        viewHolder.bind(notes, mListener);
     }
 
     public void setNotesList(List<Notes> notesList) {
