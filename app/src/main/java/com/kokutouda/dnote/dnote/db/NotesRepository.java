@@ -9,11 +9,13 @@ import java.util.List;
 public class NotesRepository {
 
     private LiveData<List<Notes>> mAllNotes;
+    private LiveData<List<Category>> mAllCategory;
     private NotesDao mNotesDao;
 
     public NotesRepository(Context applicationContext) {
         mNotesDao = NotesDatabase.getDatabase(applicationContext).noteDao();
         mAllNotes = mNotesDao.getAllNotes();
+        mAllCategory = mNotesDao.getAllCategory();
     }
 
     public LiveData<List<Notes>> getAll() {
@@ -21,17 +23,29 @@ public class NotesRepository {
     }
 
     public void insertNotes(Notes notes) {
-        new InsertAsyncTask(mNotesDao).execute(notes);
+        new InsertNotesAsyncTask(mNotesDao).execute(notes);
     }
 
     public void updateNotes(Notes notes) {
-        new Thread(new UpdateRunnable(mNotesDao, notes)).start();
+        new Thread(new UpdateNotesRunnable(mNotesDao, notes)).start();
     }
 
-    private static class InsertAsyncTask extends AsyncTask<Notes, Void, Void> {
+    public LiveData<List<Category>> getAllCategory() {
+        return this.mAllCategory;
+    }
+
+    public void insertCategory(Category category) {
+        new Thread(new InsertCategoryRunnable(this.mNotesDao, category)).start();
+    }
+
+    public void updateCategory(Category category) {
+        new Thread(new UpdateCategoryRunnable(mNotesDao, category));
+    }
+
+    private static class InsertNotesAsyncTask extends AsyncTask<Notes, Void, Void> {
         private NotesDao notesDao;
 
-        InsertAsyncTask(NotesDao notesDao) {
+        InsertNotesAsyncTask(NotesDao notesDao) {
             this.notesDao = notesDao;
         }
 
@@ -42,17 +56,45 @@ public class NotesRepository {
         }
     }
 
-    private class UpdateRunnable implements Runnable {
+    private class UpdateNotesRunnable implements Runnable {
         private Notes notes;
         private NotesDao notesDao;
 
-        UpdateRunnable(NotesDao notesDao, Notes notes) {
+        UpdateNotesRunnable(NotesDao notesDao, Notes notes) {
             this.notes = notes;
             this.notesDao = notesDao;
         }
         @Override
         public void run() {
             notesDao.updateNotes(notes);
+        }
+    }
+
+    private class InsertCategoryRunnable implements Runnable {
+        private Category category;
+        private NotesDao notesDao;
+
+        InsertCategoryRunnable (NotesDao notesDao, Category category) {
+            this.category = category;
+            this.notesDao = notesDao;
+        }
+        @Override
+        public void run() {
+            notesDao.insertCategory(this.category);
+        }
+    }
+
+    private class UpdateCategoryRunnable implements Runnable {
+        private Category category;
+        private NotesDao notesDao;
+
+        UpdateCategoryRunnable (NotesDao notesDao, Category category) {
+            this.category = category;
+            this.notesDao = notesDao;
+        }
+        @Override
+        public void run() {
+            notesDao.updateCategory(this.category);
         }
     }
 

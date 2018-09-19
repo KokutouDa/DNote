@@ -20,10 +20,24 @@ public interface NotesDao {
     @Delete
     void deleteNotes(Notes... notes);
 
-
-    @Query("SELECT * FROM Notes")
+    @Query("SELECT * FROM Notes WHERE delete_time == 0")
     LiveData<List<Notes>> getAllNotes();
+
+    @Query("SELECT * FROM Notes WHERE delete_time != 0")
+    LiveData<List<Notes>> getDeletedNotes();
 
     @Update
     void updateNotes(Notes... notes);
+
+    @Query("SELECT * FROM Notes WHERE id LIKE :categoryId")
+    LiveData<List<Notes>> getByCategory(int categoryId);
+
+    @Query("SELECT * FROM Category")
+    LiveData<List<Category>> getAllCategory();
+
+    @Update
+    void updateCategory(Category... category);
+
+    @Insert
+    void insertCategory(Category... category);
 }
