@@ -69,36 +69,12 @@ public class MainActivity extends AppCompatActivity
 
         //RecyclerView
         mRecyclerView = findViewById(R.id.recyclerView);
-        mRecyclerView.addOnItemTouchListener(new NotesListOnItemTouchListener(new NotesListOnItemTouchListener.OnItemClickListener() {
+        mRecyclerView.addOnItemTouchListener(new NotesListOnItemTouchListener(this, new NotesListOnItemTouchListener.OnItemClickListener() {
             @Override
-            public void onItemClick(View v) {
-                int position = mRecyclerView.findContainingViewHolder(v).getAdapterPosition();
+            public void onItemClick(View v, int position) {
                 startNotesAtyForResult(position);
-//                return true;
             }
         }));
-//        mRecyclerView.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
-//            @Override
-//            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-//                if (e.getAction() == MotionEvent.ACTION_UP) {
-////                    mRecyclerView.getChildLayoutPosition();
-//                    View itemView = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
-//                    if (itemView != null) {
-//
-//                        int position = mRecyclerView.findContainingViewHolder(itemView).getAdapterPosition();
-//                        startNotesAtyForResult(position);
-//                        return true;
-//                    }
-//                };
-//                return false;
-//
-//            }
-//
-//            @Override
-//            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-//                super.onTouchEvent(rv, e);
-//            }
-//        });
     }
 
     public void initData() {
