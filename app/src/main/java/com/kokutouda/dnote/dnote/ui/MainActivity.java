@@ -11,7 +11,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -123,7 +122,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
 
@@ -174,7 +173,7 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(mContext, NotesActivity.class);
         if (position != NotesActivity.POSITION_NEW_NOTES) {
 
-            Notes note = mAdapter.getNotesByPosition(position);
+            Notes note = mAdapter.getItem(position);
             intent.putExtra(NotesActivity.KEY_NOTES, note);
         }
         startActivityForResult(intent, NotesActivity.ADD_NOTES_REQUEST);

@@ -8,4 +8,10 @@
     <string name="nav_setting">设置</string>
     <string name="all_title">Title</string>
     <string name="all_content">Content</string>
+    <string name="all_category">分类</string>
+    <string name="all_tag">标签</string>
+    <string name="all_attachment">附件</string>
+    <string name="dialog_category_title">分类为</string>
+    <string name="dialog_add_category">添加类别</string>
+    <string name="dialog_remove_category">移除类别</string>
 </resources>

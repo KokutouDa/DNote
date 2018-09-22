@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 @Entity
 public class Notes implements Serializable{
@@ -26,4 +27,11 @@ public class Notes implements Serializable{
 
     @ColumnInfo(name = "delete_time")
     public long deleteTime;
+
+    public Notes(String title, String content) {
+        this.title = title;
+        this.content = content;
+        //todo createTime =
+
+    }
 }

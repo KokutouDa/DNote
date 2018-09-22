@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dialog_item_layout_height"
+    android:paddingStart="@dimen/dialog_item_padding"
+    android:paddingEnd="@dimen/dialog_item_padding">
+
+    <ImageView
+        android:id="@+id/image_notes_category_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_menu_category"
+        android:tint="@color/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/text_notes_category_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/image_notes_category_list"
+        app:layout_constraintEnd_toStartOf="@+id/text_notes_category_nums"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toEndOf="@+id/image_notes_category_list"
+        app:layout_constraintTop_toTopOf="@+id/image_notes_category_list"
+        android:paddingStart="@dimen/dialog_item_padding"
+        android:paddingEnd="@dimen/dialog_item_padding"
+        tools:text="aoeisfjawoeifjawoeif" />
+
+    <TextView
+        android:id="@+id/text_notes_category_nums"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1"
+        app:layout_constraintBottom_toBottomOf="@+id/text_notes_category_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/text_notes_category_name"
+        app:layout_constraintTop_toTopOf="@+id/text_notes_category_name" />
+</android.support.constraint.ConstraintLayout>
+
+

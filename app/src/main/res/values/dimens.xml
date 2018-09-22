@@ -10,4 +10,6 @@
     <dimen name="item_content_padding_horizontal">10dp</dimen>
     <dimen name="item_content_padding_vertical">5dp</dimen>
     <dimen name="elevation_notes_box">3dp</dimen>
+    <dimen name="dialog_item_padding">20dp</dimen>
+    <dimen name="dialog_item_layout_height">50dp</dimen>
 </resources>
