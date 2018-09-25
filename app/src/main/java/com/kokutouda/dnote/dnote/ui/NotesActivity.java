@@ -10,7 +10,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.kokutouda.dnote.dnote.R;
 import com.kokutouda.dnote.dnote.db.Category;
@@ -28,8 +33,12 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
     public static final String KEY_POSITION = "position";
     public static final String KEY_NOTES = "notes";
 
-    private EditText mTitleEdit;
-    private EditText mContentEdit;
+    private EditText mEditTextTitle;
+    private EditText mEditTextContent;
+    private AlertDialog mDialogNewCategory;
+    private ImageView mImageError;
+    private TextView mTextError;
+    private Button mBtnPositiveError;
 
     private Notes mExistedNotes;
     private CategoryListViewModel mViewModel;
@@ -40,11 +49,12 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notes);
         initView();
+
     }
 
     private void initView() {
         mViewModel = ViewModelProviders.of(this).get(CategoryListViewModel.class);
-        mAdapter = new CategoryAdapter(this, R.layout.simple_list_item);
+        mAdapter = new CategoryAdapter(this, R.layout.dialog_category_item);
         mViewModel.getCategory().observe(this, new Observer<List<Category>>() {
             @Override
             public void onChanged(@Nullable List<Category> categories) {
@@ -52,14 +62,14 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
             }
         });
 
-        mTitleEdit = findViewById(R.id.editTitle);
-        mContentEdit = findViewById(R.id.editContent);
+        mEditTextTitle = findViewById(R.id.editTitle);
+        mEditTextContent = findViewById(R.id.editContent);
 
         Intent intent = getIntent();
         mExistedNotes = (Notes) intent.getSerializableExtra(KEY_NOTES);
         if (mExistedNotes != null) {
-            mTitleEdit.setText(mExistedNotes.title);
-            mContentEdit.setText(mExistedNotes.content);
+            mEditTextTitle.setText(mExistedNotes.title);
+            mEditTextContent.setText(mExistedNotes.content);
         }
     }
 
@@ -83,7 +93,6 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.menu_notes_category:
 
@@ -106,8 +115,8 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
     }
 
     private void setNotesResult() {
-        String title = mTitleEdit.getText().toString();
-        String content = mContentEdit.getText().toString();
+        String title = mEditTextTitle.getText().toString();
+        String content = mEditTextContent.getText().toString();
         if (isNotContent()) {
             setResult(RESULT_CANCELED);
         } else {
@@ -122,18 +131,88 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
     }
 
     private boolean isNotContent() {
-        return (mTitleEdit.getText().toString().equals("") &&
-                mContentEdit.getText().toString().equals(""));
+        return (mEditTextTitle.getText().toString().equals("") &&
+                mEditTextContent.getText().toString().equals(""));
     }
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
         if (which == DialogInterface.BUTTON_POSITIVE) {
+            createDialogNewCategory();
 
         } else if (which == DialogInterface.BUTTON_NEGATIVE) {
 
         } else if (which >= 0) {
 
         }
+    }
+
+    private void createDialogNewCategory() {
+        final View viewDialogEdit = getLayoutInflater().inflate(R.layout.dialog_category_edit, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogEditTheme);
+
+        mDialogNewCategory = builder.setTitle(R.string.dialog_edit_category)
+                .setView(viewDialogEdit)
+                .setPositiveButton(R.string.all_confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        EditText editTextDialog = viewDialogEdit.findViewById(R.id.edit_dialog);
+                        String categoryName = editTextDialog.getText().toString();
+                        if (!categoryName.equals("")) {
+                            Category category = new Category(categoryName);
+                            mViewModel.insertCategory(category);
+                        }
+                    }
+                }).create();
+
+        mDialogNewCategory.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(final DialogInterface dialog) {
+                setDialogButtonClickable(mDialogNewCategory, DialogInterface.BUTTON_POSITIVE, false);
+                mDialogNewCategory.getButton(DialogInterface.BUTTON_POSITIVE).setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if (!isDialogButtonClickable(mDialogNewCategory, DialogInterface.BUTTON_POSITIVE)) {
+                            if (event.getAction() == MotionEvent.ACTION_UP) {
+                                setDialogErrorVisibility(mDialogNewCategory, View.VISIBLE);
+                            }
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+        });
+        EditText editTextCategoryName = viewDialogEdit.findViewById(R.id.edit_dialog);
+        editTextCategoryName.addTextChangedListener(new SimpleTextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                boolean clickable = !s.toString().equals("");
+                setDialogButtonClickable(mDialogNewCategory, DialogInterface.BUTTON_POSITIVE, clickable);
+                if (clickable) {
+                    setDialogErrorVisibility(mDialogNewCategory, View.GONE);
+                }
+            }
+        });
+        mDialogNewCategory.show();
+    }
+
+    private boolean isDialogButtonClickable(AlertDialog dialog, int witchButton) {
+        return dialog.getButton(witchButton).isClickable();
+    }
+
+    private void setDialogButtonClickable(AlertDialog dialog, int witchButton, boolean clickable) {
+        dialog.getButton(witchButton).setClickable(clickable);
+    }
+
+    private void setDialogErrorVisibility(AlertDialog dialog, int visibility) {
+        if (mTextError == null) {
+            mTextError = dialog.findViewById(R.id.text_error);
+        }
+        if (mImageError == null) {
+            mImageError = dialog.findViewById(R.id.image_error);
+        }
+        mTextError.setVisibility(visibility);
+        mImageError.setVisibility(visibility);
     }
 }

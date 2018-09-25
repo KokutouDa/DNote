@@ -6,12 +6,16 @@
     <string name="action_settings">Settings</string>
     <string name="nav_note">记事</string>
     <string name="nav_setting">设置</string>
-    <string name="all_title">Title</string>
-    <string name="all_content">Content</string>
+    <string name="all_title">标题</string>
+    <string name="all_content">内容</string>
     <string name="all_category">分类</string>
     <string name="all_tag">标签</string>
     <string name="all_attachment">附件</string>
     <string name="dialog_category_title">分类为</string>
     <string name="dialog_add_category">添加类别</string>
     <string name="dialog_remove_category">移除类别</string>
+    <string name="dialog_edit_category">编辑分类</string>
+    <string name="all_confirm">确定</string>
+    <string name="dialog_error_description">请先输入分类名字</string>
+    <string name="dialog_error_tips">缺少类别标题</string>
 </resources>

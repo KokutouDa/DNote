@@ -81,9 +81,10 @@ public class CategoryAdapter extends BaseAdapter {
 
         Category item = (Category) getItem(position);
 //todo 动态设置不同的分类颜色            viewHolder.image.setImageTintList();
-        viewHolder.textName.setText(item.name);
-        viewHolder.textCount.setText(String.valueOf(item.count));
-
+        if (item != null) {
+            viewHolder.textName.setText(item.name);
+            viewHolder.textCount.setText(String.valueOf(item.count));
+        }
         return convertView;
     }
 
