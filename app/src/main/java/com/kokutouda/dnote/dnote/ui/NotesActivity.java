@@ -4,6 +4,8 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
+import android.databinding.ObservableBoolean;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -12,11 +14,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.kokutouda.dnote.dnote.DialogErrorBinding;
 import com.kokutouda.dnote.dnote.R;
 import com.kokutouda.dnote.dnote.db.Category;
 import com.kokutouda.dnote.dnote.db.Notes;
@@ -36,9 +38,6 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
     private EditText mEditTextTitle;
     private EditText mEditTextContent;
     private AlertDialog mDialogNewCategory;
-    private ImageView mImageError;
-    private TextView mTextError;
-    private Button mBtnPositiveError;
 
     private Notes mExistedNotes;
     private CategoryListViewModel mViewModel;
@@ -149,6 +148,9 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
 
     private void createDialogNewCategory() {
         final View viewDialogEdit = getLayoutInflater().inflate(R.layout.dialog_category_edit, null);
+        final DialogErrorBinding dialogErrorBinding = DataBindingUtil.bind(viewDialogEdit);
+        dialogErrorBinding.setIsError(new ObservableBoolean(false));
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogEditTheme);
 
         mDialogNewCategory = builder.setTitle(R.string.dialog_edit_category)
@@ -174,7 +176,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
                     public boolean onTouch(View v, MotionEvent event) {
                         if (!isDialogButtonClickable(mDialogNewCategory, DialogInterface.BUTTON_POSITIVE)) {
                             if (event.getAction() == MotionEvent.ACTION_UP) {
-                                setDialogErrorVisibility(mDialogNewCategory, View.VISIBLE);
+                                dialogErrorBinding.getIsError().set(true);
                             }
                             return true;
                         }
@@ -190,7 +192,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
                 boolean clickable = !s.toString().equals("");
                 setDialogButtonClickable(mDialogNewCategory, DialogInterface.BUTTON_POSITIVE, clickable);
                 if (clickable) {
-                    setDialogErrorVisibility(mDialogNewCategory, View.GONE);
+                    dialogErrorBinding.getIsError().set(false);
                 }
             }
         });
@@ -203,16 +205,5 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
 
     private void setDialogButtonClickable(AlertDialog dialog, int witchButton, boolean clickable) {
         dialog.getButton(witchButton).setClickable(clickable);
-    }
-
-    private void setDialogErrorVisibility(AlertDialog dialog, int visibility) {
-        if (mTextError == null) {
-            mTextError = dialog.findViewById(R.id.text_error);
-        }
-        if (mImageError == null) {
-            mImageError = dialog.findViewById(R.id.image_error);
-        }
-        mTextError.setVisibility(visibility);
-        mImageError.setVisibility(visibility);
     }
 }
