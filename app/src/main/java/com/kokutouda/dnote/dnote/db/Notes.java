@@ -13,11 +13,14 @@ import java.sql.Timestamp;
 @Entity
 public class Notes implements Serializable{
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public Integer id;
 
     public String title;
 
     public String content;
+
+    @ColumnInfo(name = "category_id")
+    public Integer categoryId;
 
     @ColumnInfo(name = "create_time")
     public long createTime;

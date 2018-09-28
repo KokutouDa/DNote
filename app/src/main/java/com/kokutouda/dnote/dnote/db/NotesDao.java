@@ -30,10 +30,13 @@ public interface NotesDao {
     void updateNotes(Notes... notes);
 
     @Query("SELECT * FROM Notes WHERE id LIKE :categoryId")
-    LiveData<List<Notes>> getByCategory(int categoryId);
+    LiveData<List<Notes>> getNotesByCategory(int categoryId);
 
     @Query("SELECT * FROM Category")
     LiveData<List<Category>> getAllCategory();
+
+    @Query("SELECT * FROM Category WHERE id = :id")
+    Category getCategoryById(Integer id);
 
     @Update
     void updateCategory(Category... category);

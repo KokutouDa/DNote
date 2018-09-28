@@ -12,7 +12,7 @@ import java.io.Serializable;
 public class Category implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public Integer id;
 
     @NonNull
     public String name;
@@ -25,7 +25,7 @@ public class Category implements Serializable {
     }
 
     @Ignore
-    public Category(int id,@NonNull String name, int count) {
+    public Category(Integer id,@NonNull String name, int count) {
         this.id = id;
         this.name = name;
         this.count = count;

@@ -8,6 +8,9 @@ import java.util.List;
 
 public class NotesRepository {
 
+    public static final int ACTION_COUNT_INCREASE = 1;
+    public static final int ACTION_COUNT_DECREASE = -1;
+
     private LiveData<List<Notes>> mAllNotes;
     private LiveData<List<Category>> mAllCategory;
     private NotesDao mNotesDao;
@@ -39,7 +42,11 @@ public class NotesRepository {
     }
 
     public void updateCategory(Category category) {
-        new Thread(new UpdateCategoryRunnable(mNotesDao, category));
+        new Thread(new UpdateCategoryRunnable(mNotesDao, category)).start();
+    }
+
+    public void changeCategoryCount(Integer categoryId, int action) {
+        new Thread(new ChangeCountRunnable(mNotesDao, categoryId, action)).start();
     }
 
     private static class InsertNotesAsyncTask extends AsyncTask<Notes, Void, Void> {
@@ -98,6 +105,26 @@ public class NotesRepository {
         }
     }
 
+    private class ChangeCountRunnable implements Runnable {
+        private Integer categoryId;
+        private NotesDao notesDao;
+        private int action;
 
+        ChangeCountRunnable(NotesDao notesDao, Integer categoryId, int action) {
+            this.notesDao = notesDao;
+            this.categoryId = categoryId;
+            this.action = action;
+        }
 
+        @Override
+        public void run() {
+            Category category = notesDao.getCategoryById(this.categoryId);
+            if (action == ACTION_COUNT_INCREASE) {
+                category.count = category.count + 1;
+            } else if (action == ACTION_COUNT_DECREASE) {
+                category.count = category.count - 1;
+            }
+            notesDao.updateCategory(category);
+        }
+    }
 }

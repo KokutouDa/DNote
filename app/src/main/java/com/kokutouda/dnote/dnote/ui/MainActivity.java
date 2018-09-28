@@ -30,6 +30,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static final int POSITION_NEW_NOTES = -1;
+
     private RecyclerView mRecyclerView;
     private Context mContext;
     private NotesAdapter mAdapter;
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startNotesAtyForResult(NotesActivity.POSITION_NEW_NOTES);
+                startNotesAtyForResult(POSITION_NEW_NOTES);
             }
         });
 
@@ -97,14 +99,17 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         if (requestCode == NotesActivity.ADD_NOTES_REQUEST) {
             if (resultCode == RESULT_OK) {
-                int position = data.getIntExtra(NotesActivity.KEY_POSITION, NotesActivity.POSITION_EXISTED_NOTES);
                 Notes notes = (Notes) data.getSerializableExtra("notes");
 
-                if (position == NotesActivity.POSITION_NEW_NOTES) {
+                if (notes.id == null) {
                     mViewModel.insertNotes(notes);
                 } else {
                     mViewModel.updateNotes(notes);
+                    //todo 更新CategoryNotes
                 }
+
+                //todo创建、更新、删除CategoryNotes
+
             }
         }
     }
@@ -171,7 +176,7 @@ public class MainActivity extends AppCompatActivity
      */
     private void startNotesAtyForResult(int position) {
         Intent intent = new Intent(mContext, NotesActivity.class);
-        if (position != NotesActivity.POSITION_NEW_NOTES) {
+        if (position != POSITION_NEW_NOTES) {
 
             Notes note = mAdapter.getItem(position);
             intent.putExtra(NotesActivity.KEY_NOTES, note);

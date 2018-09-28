@@ -15,8 +15,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.kokutouda.dnote.dnote.DialogErrorBinding;
 import com.kokutouda.dnote.dnote.R;
@@ -30,9 +28,6 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
 
     public static final int ADD_NOTES_REQUEST = 999;
 
-    public static final int POSITION_NEW_NOTES = -1;
-    public static final int POSITION_EXISTED_NOTES = 99;
-    public static final String KEY_POSITION = "position";
     public static final String KEY_NOTES = "notes";
 
     private EditText mEditTextTitle;
@@ -42,6 +37,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
     private Notes mExistedNotes;
     private CategoryListViewModel mViewModel;
     private CategoryAdapter mAdapter;
+    private Integer mCategoryId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +65,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
         if (mExistedNotes != null) {
             mEditTextTitle.setText(mExistedNotes.title);
             mEditTextContent.setText(mExistedNotes.content);
+            mCategoryId = mExistedNotes.categoryId;
         }
     }
 
@@ -121,9 +118,9 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
         } else {
             Intent intent = new Intent();
             if (mExistedNotes == null) {
-                intent.putExtra(KEY_POSITION, POSITION_NEW_NOTES);
                 mExistedNotes = new Notes(title, content);
             }
+            mExistedNotes.categoryId = mCategoryId;
             intent.putExtra(KEY_NOTES, mExistedNotes);
             setResult(RESULT_OK, intent);
         }
@@ -138,10 +135,10 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
     public void onClick(DialogInterface dialog, int which) {
         if (which == DialogInterface.BUTTON_POSITIVE) {
             createDialogNewCategory();
-
         } else if (which == DialogInterface.BUTTON_NEGATIVE) {
-
+            removeFromCategory();
         } else if (which >= 0) {
+            addToCategory(which);
 
         }
     }
@@ -205,5 +202,28 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
 
     private void setDialogButtonClickable(AlertDialog dialog, int witchButton, boolean clickable) {
         dialog.getButton(witchButton).setClickable(clickable);
+    }
+
+    //笔记添加到分类中
+    private void addToCategory(int which) {
+        Category category = (Category) mAdapter.getItem(which);
+        if (category != null) {
+            if (mCategoryId != null) {
+                if (!mCategoryId.equals(category.id)) {
+                    mViewModel.changeCategory(mCategoryId, category.id);
+                }
+            } else {
+                mViewModel.changeCategory(null, category.id);
+
+            }
+            mCategoryId = category.id;
+        }
+    }
+
+    private void removeFromCategory() {
+        if (mCategoryId != null) {
+            mViewModel.changeCategory(mCategoryId, null);
+            mCategoryId = null;
+        }
     }
 }

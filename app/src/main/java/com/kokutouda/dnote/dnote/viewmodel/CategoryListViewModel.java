@@ -33,4 +33,13 @@ public class CategoryListViewModel extends AndroidViewModel {
     public void updateCategory(Category category) {
         mRepository.updateCategory(category);
     }
+
+    public void changeCategory(Integer oldId, Integer newId) {
+        if (oldId != null) {
+            mRepository.changeCategoryCount(oldId, NotesRepository.ACTION_COUNT_DECREASE);
+        }
+        if (newId != null) {
+            mRepository.changeCategoryCount(newId, NotesRepository.ACTION_COUNT_INCREASE);
+        }
+    }
 }
