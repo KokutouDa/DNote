@@ -36,7 +36,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
 
     private Notes mExistedNotes;
     private CategoryListViewModel mViewModel;
-    private CategoryAdapter mAdapter;
+    private CategoryDialogAdapter mAdapter;
     private Integer mCategoryId;
 
     @Override
@@ -49,7 +49,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
 
     private void initView() {
         mViewModel = ViewModelProviders.of(this).get(CategoryListViewModel.class);
-        mAdapter = new CategoryAdapter(this, R.layout.dialog_category_item);
+        mAdapter = new CategoryDialogAdapter(this, R.layout.item_category_main);
         mViewModel.getCategory().observe(this, new Observer<List<Category>>() {
             @Override
             public void onChanged(@Nullable List<Category> categories) {

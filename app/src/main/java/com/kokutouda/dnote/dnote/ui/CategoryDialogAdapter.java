@@ -1,27 +1,21 @@
 package com.kokutouda.dnote.dnote.ui;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.kokutouda.dnote.dnote.R;
 import com.kokutouda.dnote.dnote.db.Category;
-import com.kokutouda.dnote.dnote.db.NotesRepository;
 
 import java.util.List;
 
-public class CategoryAdapter extends BaseAdapter {
+public class CategoryDialogAdapter extends BaseAdapter {
 
     private int mResources;
     private Context mContext;
@@ -30,17 +24,17 @@ public class CategoryAdapter extends BaseAdapter {
     class ViewHolder {
         TextView textName;
         TextView textCount;
-        ImageView image;
+        ImageView imageIcon;
 
         ViewHolder(View v) {
-            image = v.findViewById(R.id.image_notes_category_list);
-            textName = v.findViewById(R.id.text_notes_category_name);
+            imageIcon = v.findViewById(R.id.image_nav_menu_item);
+            textName = v.findViewById(R.id.text_nav_menu_item);
             textCount = v.findViewById(R.id.text_notes_category_nums);
         }
 
     }
 
-    public CategoryAdapter(@NonNull Context context, int resource) {
+    public CategoryDialogAdapter(@NonNull Context context, int resource) {
         mResources = resource;
         mContext = context;
     }
@@ -80,7 +74,7 @@ public class CategoryAdapter extends BaseAdapter {
         ViewHolder viewHolder = new ViewHolder(convertView);
 
         Category item = (Category) getItem(position);
-//todo 动态设置不同的分类颜色            viewHolder.image.setImageTintList();
+//todo 动态设置不同的分类颜色            viewHolder.imageIcon.setImageTintList();
         if (item != null) {
             viewHolder.textName.setText(item.name);
             viewHolder.textCount.setText(String.valueOf(item.count));

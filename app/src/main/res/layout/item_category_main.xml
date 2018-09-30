@@ -10,7 +10,7 @@
     android:paddingEnd="@dimen/dialog_item_padding">
 
     <ImageView
-        android:id="@+id/image_notes_category_list"
+        android:id="@+id/image_nav_menu_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_menu_category"
@@ -20,15 +20,15 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/text_notes_category_name"
+        android:id="@+id/text_nav_menu_item"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/image_notes_category_list"
+        app:layout_constraintBottom_toBottomOf="@+id/image_nav_menu_item"
         app:layout_constraintEnd_toStartOf="@+id/text_notes_category_nums"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toEndOf="@+id/image_notes_category_list"
-        app:layout_constraintTop_toTopOf="@+id/image_notes_category_list"
+        app:layout_constraintStart_toEndOf="@+id/image_nav_menu_item"
+        app:layout_constraintTop_toTopOf="@+id/image_nav_menu_item"
         android:paddingStart="@dimen/dialog_item_padding"
         android:paddingEnd="@dimen/dialog_item_padding"
         tools:text="aoeisfjawoeifjawoeif" />
@@ -38,11 +38,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="1"
-        app:layout_constraintBottom_toBottomOf="@+id/text_notes_category_name"
+        app:layout_constraintBottom_toBottomOf="@+id/text_nav_menu_item"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/text_notes_category_name"
-        app:layout_constraintTop_toTopOf="@+id/text_notes_category_name" />
+        app:layout_constraintStart_toEndOf="@+id/text_nav_menu_item"
+        app:layout_constraintTop_toTopOf="@+id/text_nav_menu_item" />
 </android.support.constraint.ConstraintLayout>
 
 

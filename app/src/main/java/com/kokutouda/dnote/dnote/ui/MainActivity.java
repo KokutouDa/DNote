@@ -22,20 +22,26 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.kokutouda.dnote.dnote.R;
+import com.kokutouda.dnote.dnote.data.MainNavData;
+import com.kokutouda.dnote.dnote.db.Category;
 import com.kokutouda.dnote.dnote.db.Notes;
+import com.kokutouda.dnote.dnote.viewmodel.CategoryListViewModel;
 import com.kokutouda.dnote.dnote.viewmodel.NotesListViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity {
 
     public static final int POSITION_NEW_NOTES = -1;
 
     private RecyclerView mRecyclerView;
     private Context mContext;
-    private NotesAdapter mAdapter;
-    private NotesListViewModel mViewModel;
+    private NotesAdapter mNotesAdapter;
+    private NotesListViewModel mNotesModel;
+    private CategoryListViewModel mCategoryModel;
+    private RecyclerView mCategoryView;
+    private CategoryNavAdapter mCategoryNavAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +49,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         mContext = this;
         initView();
-        initData();
     }
 
     public void initView() {
@@ -66,8 +71,29 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        //navigation view
         NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        List<MainNavData> headerData = new ArrayList<>();
+        //todo use arrays.xml??
+        headerData.add(new MainNavData(R.drawable.ic_nav_note_add, "记事"));
+        List<MainNavData> footerData = new ArrayList<>();
+        footerData.add(new MainNavData(R.drawable.ic_nav_setting, "设置"));
+        mCategoryNavAdapter = new CategoryNavAdapter(headerData, footerData);
+        mCategoryView = findViewById(R.id.recyclerview_nav_categories);
+        mCategoryView.setLayoutManager(new LinearLayoutManager(this));
+        mCategoryView.setAdapter(mCategoryNavAdapter);
+        mCategoryModel = ViewModelProviders.of(this).get(CategoryListViewModel.class);
+        mCategoryModel.getCategory().observe(this, new Observer<List<Category>>() {
+            @Override
+            public void onChanged(@Nullable List<Category> categories) {
+                mCategoryNavAdapter.setCategoryList(categories);
+            }
+        });
+        /**
+         * todo
+         * DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+         * drawer.closeDrawer(GravityCompat.START);
+         */
 
         //RecyclerView
         mRecyclerView = findViewById(R.id.recyclerView);
@@ -78,21 +104,16 @@ public class MainActivity extends AppCompatActivity
                 startNotesAtyForResult(position);
             }
         }));
-    }
-
-    public void initData() {
-        mViewModel = ViewModelProviders.of(this).get(NotesListViewModel.class);
-        mViewModel.getAll().observe(this, new Observer<List<Notes>>() {
+        mNotesModel = ViewModelProviders.of(this).get(NotesListViewModel.class);
+        mNotesModel.getAll().observe(this, new Observer<List<Notes>>() {
             @Override
             public void onChanged(@Nullable List<Notes> notes) {
-                mAdapter.setNotesList(notes);
+                mNotesAdapter.setNotesList(notes);
             }
         });
-
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        mAdapter = new NotesAdapter();
-        mRecyclerView.setAdapter(mAdapter);
-
+        mNotesAdapter = new NotesAdapter();
+        mRecyclerView.setAdapter(mNotesAdapter);
     }
 
     @Override
@@ -102,14 +123,10 @@ public class MainActivity extends AppCompatActivity
                 Notes notes = (Notes) data.getSerializableExtra("notes");
 
                 if (notes.id == null) {
-                    mViewModel.insertNotes(notes);
+                    mNotesModel.insertNotes(notes);
                 } else {
-                    mViewModel.updateNotes(notes);
-                    //todo 更新CategoryNotes
+                    mNotesModel.updateNotes(notes);
                 }
-
-                //todo创建、更新、删除CategoryNotes
-
             }
         }
     }
@@ -150,26 +167,6 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_note) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_setting) {
-
-        }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
     /**
      *
      * @param position -1时表示新数据
@@ -178,12 +175,9 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(mContext, NotesActivity.class);
         if (position != POSITION_NEW_NOTES) {
 
-            Notes note = mAdapter.getItem(position);
+            Notes note = mNotesAdapter.getItem(position);
             intent.putExtra(NotesActivity.KEY_NOTES, note);
         }
         startActivityForResult(intent, NotesActivity.ADD_NOTES_REQUEST);
-
-
     }
-
 }
