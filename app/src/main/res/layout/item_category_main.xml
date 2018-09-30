@@ -7,7 +7,11 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/dialog_item_layout_height"
     android:paddingStart="@dimen/dialog_item_padding"
-    android:paddingEnd="@dimen/dialog_item_padding">
+    android:paddingEnd="@dimen/dialog_item_padding"
+    android:background="@android:color/white"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
 
     <ImageView
         android:id="@+id/image_nav_menu_item"
@@ -30,8 +34,7 @@
         app:layout_constraintStart_toEndOf="@+id/image_nav_menu_item"
         app:layout_constraintTop_toTopOf="@+id/image_nav_menu_item"
         android:paddingStart="@dimen/dialog_item_padding"
-        android:paddingEnd="@dimen/dialog_item_padding"
-        tools:text="aoeisfjawoeifjawoeif" />
+        android:paddingEnd="@dimen/dialog_item_padding" />
 
     <TextView
         android:id="@+id/text_notes_category_nums"

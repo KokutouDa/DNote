@@ -35,6 +35,5 @@ public class Notes implements Serializable{
         this.title = title;
         this.content = content;
         //todo createTime =
-
     }
 }

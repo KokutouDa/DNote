@@ -5,14 +5,12 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -22,13 +20,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.kokutouda.dnote.dnote.R;
-import com.kokutouda.dnote.dnote.data.MainNavData;
 import com.kokutouda.dnote.dnote.db.Category;
 import com.kokutouda.dnote.dnote.db.Notes;
+import com.kokutouda.dnote.dnote.util.NavigationViewUtils;
 import com.kokutouda.dnote.dnote.viewmodel.CategoryListViewModel;
 import com.kokutouda.dnote.dnote.viewmodel.NotesListViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -72,16 +69,35 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
 
         //navigation view
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        List<MainNavData> headerData = new ArrayList<>();
-        //todo use arrays.xml??
-        headerData.add(new MainNavData(R.drawable.ic_nav_note_add, "记事"));
-        List<MainNavData> footerData = new ArrayList<>();
-        footerData.add(new MainNavData(R.drawable.ic_nav_setting, "设置"));
-        mCategoryNavAdapter = new CategoryNavAdapter(headerData, footerData);
+//        NavigationView navigationView = findViewById(R.id.nav_view);
+
+
+        mCategoryNavAdapter = new CategoryNavAdapter(NavigationViewUtils.getHeaderData(mContext)
+                , NavigationViewUtils.getFooterData(mContext));
         mCategoryView = findViewById(R.id.recyclerview_nav_categories);
         mCategoryView.setLayoutManager(new LinearLayoutManager(this));
         mCategoryView.setAdapter(mCategoryNavAdapter);
+        final SimpleOnItemTouchListener.OnItemClickListener itemClick = new SimpleOnItemTouchListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View v, int position) {
+                //todo cheakable=true or selected=true
+                DrawerLayout drawer = findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.START);
+            }
+        };
+        SimpleOnItemTouchListener.OnItemLongClickListener itemLongClick = new SimpleOnItemTouchListener.OnItemLongClickListener() {
+            @Override
+            public void onItemLongClick(View v, int position) {
+                int viewType = mCategoryNavAdapter.getItemViewType(position);
+                if (viewType != CategoryNavAdapter.VIEW_TYPE_MAIN) {
+                    itemClick.onItemClick(v, position);
+                } else {
+                    //todo edit category name
+                }
+
+            }
+        };
+        mCategoryView.addOnItemTouchListener(new SimpleOnItemTouchListener(mContext, mCategoryView, itemClick, itemLongClick));
         mCategoryModel = ViewModelProviders.of(this).get(CategoryListViewModel.class);
         mCategoryModel.getCategory().observe(this, new Observer<List<Category>>() {
             @Override
@@ -89,21 +105,22 @@ public class MainActivity extends AppCompatActivity {
                 mCategoryNavAdapter.setCategoryList(categories);
             }
         });
-        /**
-         * todo
-         * DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-         * drawer.closeDrawer(GravityCompat.START);
-         */
 
         //RecyclerView
         mRecyclerView = findViewById(R.id.recyclerView);
-        mRecyclerView.addOnItemTouchListener(new NotesListOnItemTouchListener(this, new NotesListOnItemTouchListener.OnItemClickListener() {
+        mRecyclerView.addOnItemTouchListener(new SimpleOnItemTouchListener(this, mRecyclerView,
+                new SimpleOnItemTouchListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View v, int position) {
+                        startNotesAtyForResult(position);
+                    }
+                },
+                new SimpleOnItemTouchListener.OnItemLongClickListener() {
+                    @Override
+                    public void onItemLongClick(View v, int position) {
 
-            @Override
-            public void onItemClick(View v, int position) {
-                startNotesAtyForResult(position);
-            }
-        }));
+                    }
+                }));
         mNotesModel = ViewModelProviders.of(this).get(NotesListViewModel.class);
         mNotesModel.getAll().observe(this, new Observer<List<Notes>>() {
             @Override
@@ -168,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
      * @param position -1时表示新数据
      */
     private void startNotesAtyForResult(int position) {

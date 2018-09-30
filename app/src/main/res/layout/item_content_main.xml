@@ -5,13 +5,16 @@
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:background="@color/colorNoteMain"
     android:layout_marginStart="@dimen/item_content_padding_horizontal"
     android:layout_marginEnd="@dimen/item_content_padding_horizontal"
     android:layout_marginTop="@dimen/item_content_padding_vertical"
     android:layout_marginBottom="@dimen/item_content_padding_vertical"
     android:padding="@dimen/item_content_padding_horizontal"
-    android:elevation="@dimen/elevation_notes_box">
+    android:elevation="@dimen/elevation_notes_box"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@android:color/white"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <TextView
         android:id="@+id/text_title"

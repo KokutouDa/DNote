@@ -18,9 +18,9 @@ import java.util.List;
 
 public class CategoryNavAdapter extends RecyclerView.Adapter {
 
-    private static final int VIEW_TYPE_HEADER = -1;
-    private static final int VIEW_TYPE_FOOTER = -2;
-    private static final int VIEW_TYPE_MAIN = 0;
+    public static final int VIEW_TYPE_HEADER = -1;
+    public static final int VIEW_TYPE_FOOTER = -2;
+    public static final int VIEW_TYPE_MAIN = 0;
 
 
     private List<Category> mCategoryList;
@@ -101,7 +101,6 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
             headerFooter.imageIcon.setImageResource(item.getRes());
             headerFooter.textName.setText(item.getText());
         }
-
     }
 
     @Override

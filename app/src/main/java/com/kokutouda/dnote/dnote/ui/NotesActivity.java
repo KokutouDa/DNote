@@ -119,6 +119,9 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
             Intent intent = new Intent();
             if (mExistedNotes == null) {
                 mExistedNotes = new Notes(title, content);
+            } else {
+                mExistedNotes.title = title;
+                mExistedNotes.content = content;
             }
             mExistedNotes.categoryId = mCategoryId;
             intent.putExtra(KEY_NOTES, mExistedNotes);

@@ -5,7 +5,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:paddingStart="@dimen/dialog_item_padding"
-    android:paddingEnd="@dimen/dialog_item_padding">
+    android:paddingEnd="@dimen/dialog_item_padding"
+    android:background="@android:color/white"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:focusable="true"
+    android:clickable="true">
 
     <ImageView
         android:id="@+id/image_nav_menu_item"
