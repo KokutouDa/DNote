@@ -3,13 +3,19 @@ package com.kokutouda.dnote.dnote.ui;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
+import android.databinding.ObservableBoolean;
+import android.databinding.ObservableField;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Selection;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -18,10 +24,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 
+import com.kokutouda.dnote.dnote.DialogErrorBinding;
 import com.kokutouda.dnote.dnote.R;
 import com.kokutouda.dnote.dnote.db.Category;
 import com.kokutouda.dnote.dnote.db.Notes;
+import com.kokutouda.dnote.dnote.util.DialogUtil;
 import com.kokutouda.dnote.dnote.util.NavigationViewUtils;
 import com.kokutouda.dnote.dnote.viewmodel.CategoryListViewModel;
 import com.kokutouda.dnote.dnote.viewmodel.NotesListViewModel;
@@ -87,13 +96,9 @@ public class MainActivity extends AppCompatActivity {
         };
         SimpleOnItemTouchListener.OnItemLongClickListener itemLongClick = new SimpleOnItemTouchListener.OnItemLongClickListener() {
             @Override
-            public void onItemLongClick(View v, int position) {
-                int viewType = mCategoryNavAdapter.getItemViewType(position);
-                if (viewType != CategoryNavAdapter.VIEW_TYPE_MAIN) {
-                    itemClick.onItemClick(v, position);
-                } else {
-                    //todo edit category name
-                }
+            public void onItemLongClick(View itemView, int position) {
+
+                createDialogEditCategory(itemView, position);
 
             }
         };
@@ -195,5 +200,25 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra(NotesActivity.KEY_NOTES, note);
         }
         startActivityForResult(intent, NotesActivity.ADD_NOTES_REQUEST);
+    }
+
+    private void createDialogEditCategory(View itemView, final int position) {
+        final View viewDialogEdit = getLayoutInflater().inflate(R.layout.dialog_category_edit, null);
+        final Category category = mCategoryNavAdapter.getItemByLayoutPosition(position);
+        final EditText editText = viewDialogEdit.findViewById(R.id.edit_dialog);
+
+        AlertDialog alertDialog = DialogUtil.createCategoryDialog(this, viewDialogEdit, category.name);
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_confirm), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                category.name = editText.getText().toString();
+                mCategoryModel.updateCategory(category);
+            }
+        });
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.all_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) { }
+        });
+        alertDialog.show();
     }
 }

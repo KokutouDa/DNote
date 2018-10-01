@@ -7,6 +7,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
+import static com.kokutouda.dnote.dnote.ui.RecyclerViewType.VIEW_TYPE_MAIN;
+
 public class SimpleOnItemTouchListener implements RecyclerView.OnItemTouchListener {
 
     private OnItemClickListener mClickListener;
@@ -17,6 +19,7 @@ public class SimpleOnItemTouchListener implements RecyclerView.OnItemTouchListen
     //长按时选中的View
     private View mViewOnLongClick;
 
+
     public interface OnItemClickListener {
         void onItemClick(View v, int position);
     }
@@ -25,7 +28,7 @@ public class SimpleOnItemTouchListener implements RecyclerView.OnItemTouchListen
         void onItemLongClick(View v, int position);
     }
 
-    public SimpleOnItemTouchListener(Context context,RecyclerView recyclerView, OnItemClickListener onItemClickListener, OnItemLongClickListener onItemLongClickListener) {
+    public SimpleOnItemTouchListener(Context context, final RecyclerView recyclerView, OnItemClickListener onItemClickListener, OnItemLongClickListener onItemLongClickListener) {
         mClickListener = onItemClickListener;
         mRecyclerView = recyclerView;
         mLongClickListener = onItemLongClickListener;
@@ -38,8 +41,15 @@ public class SimpleOnItemTouchListener implements RecyclerView.OnItemTouchListen
 
             @Override
             public void onLongPress(MotionEvent e) {
-                mIsLongClick = true;
-                mViewOnLongClick = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
+                View itemView = recyclerView.findChildViewUnder(e.getX(), e.getY());
+                int position = recyclerView.getChildLayoutPosition(itemView);
+                int viewType = mRecyclerView.getAdapter().getItemViewType(position);
+                if (viewType == VIEW_TYPE_MAIN) {
+                    mLongClickListener.onItemLongClick(itemView, position);
+                } else {
+                    mIsLongClick = true;
+                    mViewOnLongClick = itemView;
+                }
             }
         });
     }
@@ -48,7 +58,7 @@ public class SimpleOnItemTouchListener implements RecyclerView.OnItemTouchListen
     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
         View itemView = rv.findChildViewUnder(e.getX(), e.getY());
         if (mClickListener != null && itemView != null && mGestureDetector.onTouchEvent(e)) {
-            int position = rv.getChildAdapterPosition(itemView);
+            int position = rv.getChildLayoutPosition(itemView);
             mClickListener.onItemClick(itemView, position);
             return true;
         }
@@ -56,7 +66,7 @@ public class SimpleOnItemTouchListener implements RecyclerView.OnItemTouchListen
             mIsLongClick = false;
             if (mViewOnLongClick == itemView) {
                 int position = mRecyclerView.getChildLayoutPosition(itemView);
-                mLongClickListener.onItemLongClick(itemView, position);
+                mClickListener.onItemClick(itemView, position);
             }
             return true;
         }

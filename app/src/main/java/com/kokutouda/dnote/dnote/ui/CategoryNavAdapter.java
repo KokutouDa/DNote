@@ -16,12 +16,11 @@ import com.kokutouda.dnote.dnote.db.Category;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.kokutouda.dnote.dnote.ui.RecyclerViewType.VIEW_TYPE_FOOTER;
+import static com.kokutouda.dnote.dnote.ui.RecyclerViewType.VIEW_TYPE_HEADER;
+import static com.kokutouda.dnote.dnote.ui.RecyclerViewType.VIEW_TYPE_MAIN;
+
 public class CategoryNavAdapter extends RecyclerView.Adapter {
-
-    public static final int VIEW_TYPE_HEADER = -1;
-    public static final int VIEW_TYPE_FOOTER = -2;
-    public static final int VIEW_TYPE_MAIN = 0;
-
 
     private List<Category> mCategoryList;
     private List<MainNavData> mHeaderData;
@@ -120,6 +119,14 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
         } else {
             return VIEW_TYPE_MAIN;
         }
+    }
+
+    public Category getItemByAdapterPosition(int position) {
+        return this.mCategoryList.get(position);
+    }
+
+    public Category getItemByLayoutPosition(int position) {
+        return this.mCategoryList.get(position - mHeaderData.size());
     }
 
     public void setCategoryList(List<Category> categoryList) {

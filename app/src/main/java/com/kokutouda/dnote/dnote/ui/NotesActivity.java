@@ -20,6 +20,7 @@ import com.kokutouda.dnote.dnote.DialogErrorBinding;
 import com.kokutouda.dnote.dnote.R;
 import com.kokutouda.dnote.dnote.db.Category;
 import com.kokutouda.dnote.dnote.db.Notes;
+import com.kokutouda.dnote.dnote.util.DialogUtil;
 import com.kokutouda.dnote.dnote.viewmodel.CategoryListViewModel;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
     private AlertDialog mDialogNewCategory;
 
     private Notes mExistedNotes;
-    private CategoryListViewModel mViewModel;
+    private CategoryListViewModel mCategoryModel;
     private CategoryDialogAdapter mAdapter;
     private Integer mCategoryId;
 
@@ -48,9 +49,9 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
     }
 
     private void initView() {
-        mViewModel = ViewModelProviders.of(this).get(CategoryListViewModel.class);
+        mCategoryModel = ViewModelProviders.of(this).get(CategoryListViewModel.class);
         mAdapter = new CategoryDialogAdapter(this, R.layout.item_category_main);
-        mViewModel.getCategory().observe(this, new Observer<List<Category>>() {
+        mCategoryModel.getCategory().observe(this, new Observer<List<Category>>() {
             @Override
             public void onChanged(@Nullable List<Category> categories) {
                 mAdapter.setCategoryList(categories);
@@ -91,7 +92,6 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_notes_category:
-
                 AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
                 builder.setTitle(R.string.dialog_category_title)
                         .setAdapter(mAdapter, this)
@@ -148,55 +148,19 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
 
     private void createDialogNewCategory() {
         final View viewDialogEdit = getLayoutInflater().inflate(R.layout.dialog_category_edit, null);
-        final DialogErrorBinding dialogErrorBinding = DataBindingUtil.bind(viewDialogEdit);
-        dialogErrorBinding.setIsError(new ObservableBoolean(false));
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogEditTheme);
-
-        mDialogNewCategory = builder.setTitle(R.string.dialog_edit_category)
-                .setView(viewDialogEdit)
-                .setPositiveButton(R.string.all_confirm, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        EditText editTextDialog = viewDialogEdit.findViewById(R.id.edit_dialog);
-                        String categoryName = editTextDialog.getText().toString();
-                        if (!categoryName.equals("")) {
-                            Category category = new Category(categoryName);
-                            mViewModel.insertCategory(category);
-                        }
-                    }
-                }).create();
-
-        mDialogNewCategory.setOnShowListener(new DialogInterface.OnShowListener() {
+        AlertDialog alertDialog = DialogUtil.createCategoryDialog(this, viewDialogEdit, null);
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_confirm), new DialogInterface.OnClickListener() {
             @Override
-            public void onShow(final DialogInterface dialog) {
-                setDialogButtonClickable(mDialogNewCategory, DialogInterface.BUTTON_POSITIVE, false);
-                mDialogNewCategory.getButton(DialogInterface.BUTTON_POSITIVE).setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        if (!isDialogButtonClickable(mDialogNewCategory, DialogInterface.BUTTON_POSITIVE)) {
-                            if (event.getAction() == MotionEvent.ACTION_UP) {
-                                dialogErrorBinding.getIsError().set(true);
-                            }
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-            }
-        });
-        EditText editTextCategoryName = viewDialogEdit.findViewById(R.id.edit_dialog);
-        editTextCategoryName.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                boolean clickable = !s.toString().equals("");
-                setDialogButtonClickable(mDialogNewCategory, DialogInterface.BUTTON_POSITIVE, clickable);
-                if (clickable) {
-                    dialogErrorBinding.getIsError().set(false);
+            public void onClick(DialogInterface dialog, int which) {
+                EditText editTextDialog = viewDialogEdit.findViewById(R.id.edit_dialog);
+                String categoryName = editTextDialog.getText().toString();
+                if (!categoryName.equals("")) {
+                    Category category = new Category(categoryName);
+                    mCategoryModel.insertCategory(category);
                 }
             }
         });
-        mDialogNewCategory.show();
+        alertDialog.show();
     }
 
     private boolean isDialogButtonClickable(AlertDialog dialog, int witchButton) {
@@ -213,10 +177,10 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
         if (category != null) {
             if (mCategoryId != null) {
                 if (!mCategoryId.equals(category.id)) {
-                    mViewModel.changeCategory(mCategoryId, category.id);
+                    mCategoryModel.changeCategory(mCategoryId, category.id);
                 }
             } else {
-                mViewModel.changeCategory(null, category.id);
+                mCategoryModel.changeCategory(null, category.id);
 
             }
             mCategoryId = category.id;
@@ -225,7 +189,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
 
     private void removeFromCategory() {
         if (mCategoryId != null) {
-            mViewModel.changeCategory(mCategoryId, null);
+            mCategoryModel.changeCategory(mCategoryId, null);
             mCategoryId = null;
         }
     }
