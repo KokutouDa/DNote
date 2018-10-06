@@ -89,13 +89,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 int position = mCategoryView.getChildAdapterPosition(v);
-                int oldPosition = mCategoryNavAdapter.getOldPosition();
-                if (oldPosition != -1) {
-                    RecyclerView.ViewHolder oldViewHolder = mCategoryView.findViewHolderForAdapterPosition(oldPosition);
-                    mCategoryNavAdapter.notifyItemChanged(position, oldViewHolder);
-                } else {
-                    mCategoryNavAdapter.notifyItemChanged(position, "any");
-                }
+                mCategoryNavAdapter.notifyItemChanged(position, "any");
 
                 DrawerLayout drawer = findViewById(R.id.drawer_layout);
                 drawer.closeDrawer(GravityCompat.START);

@@ -34,7 +34,7 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
 
     private View.OnClickListener mItemClickListener;
     private View.OnLongClickListener mItemLongClickListener;
-    private int mOldCheckedPosition = -1;
+    private AdapterCheckable mCheckedItem;
 
     interface AdapterCheckable extends Checkable {
         @Override
@@ -145,12 +145,12 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
         if (mFooterData == null) {
             mFooterData = new ArrayList<>();
         }
+        mCheckedItem = null;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         if (viewType == VIEW_TYPE_MAIN) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_category_main, parent, false);
@@ -171,8 +171,8 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
         if (getItemViewType(position) == VIEW_TYPE_MAIN) {
             MainViewHolder main = (MainViewHolder) holder;
-            int mainIndex = position - mHeaderData.size();
-            Category category = mCategoryList.get(mainIndex);
+            int index = getMainIndexFromPosition(position);
+            Category category = mCategoryList.get(index);
             main.textName.setText(category.name);
             main.textCount.setText(String.valueOf(category.count));
             main.setChecked(main.isChecked());
@@ -182,8 +182,8 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
             if (position < mHeaderData.size()) {
                 item = mHeaderData.get(position);
             } else {
-                int footerIndex = position - mHeaderData.size() - mCategoryList.size();
-                item = mFooterData.get(footerIndex);
+                int index = getFooterIndexFromPosition(position);
+                item = mFooterData.get(index);
             }
             headerFooter.imageIcon.setImageResource(item.getRes());
             headerFooter.setChecked(headerFooter.isChecked());
@@ -211,6 +211,11 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
                 }
             });
         }
+
+        if (mCheckedItem == null && holder instanceof AdapterCheckable) {
+            mCheckedItem = (AdapterCheckable) holder;
+            mCheckedItem.setChecked(true);
+        }
     }
 
     @Override
@@ -218,17 +223,22 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
         if (payloads.isEmpty()) {
             this.onBindViewHolder(holder, position);
         } else {
-            if (payloads.get(0) instanceof RecyclerView.ViewHolder) {
-                RecyclerView.ViewHolder oldCheckedViewHolder = (RecyclerView.ViewHolder) payloads.get(0);
-                if (oldCheckedViewHolder instanceof AdapterCheckable) {
-                    ((AdapterCheckable) oldCheckedViewHolder).setChecked(false);
+            if (holder instanceof AdapterCheckable && mCheckedItem != holder) {
+                if (mCheckedItem != null) {
+                    mCheckedItem.setChecked(false);
                 }
-            }
-            if (holder instanceof AdapterCheckable) {
-                ((AdapterCheckable) holder).setChecked(true);
-                mOldCheckedPosition = position;
+                mCheckedItem = (AdapterCheckable) holder;
+                mCheckedItem.setChecked(true);
             }
         }
+    }
+
+    public int getMainIndexFromPosition(int position) {
+        return position - mHeaderData.size();
+    }
+
+    public int getFooterIndexFromPosition(int position) {
+        return position - mHeaderData.size() - mCategoryList.size();
     }
 
     @Override
@@ -274,14 +284,5 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
     public void setCategoryList(List<Category> categoryList) {
         this.mCategoryList = categoryList;
         notifyDataSetChanged();
-    }
-
-    public int getOldPosition() {
-        return mOldCheckedPosition;
-    }
-
-    public void setOldPosition(int position) {
-        notifyDataSetChanged();
-        this.mOldCheckedPosition = position;
     }
 }
