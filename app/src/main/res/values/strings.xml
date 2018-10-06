@@ -19,4 +19,5 @@
     <string name="dialog_error_description">请先输入分类名字</string>
     <string name="dialog_error_tips">缺少类别标题</string>
     <string name="all_cancel">取消</string>
+    <string name="all_recycler">回收站</string>
 </resources>

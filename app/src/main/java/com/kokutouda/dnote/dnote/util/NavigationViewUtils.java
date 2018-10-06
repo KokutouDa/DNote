@@ -13,6 +13,7 @@ public class NavigationViewUtils {
     public static List<MainNavData> getHeaderData(Context context) {
         List<MainNavData> headerData = new ArrayList<>();
         headerData.add(new MainNavData(R.drawable.ic_nav_note_add, context.getString(R.string.nav_note)));
+        headerData.add(new MainNavData(R.drawable.ic_nav_note_add, context.getString(R.string.all_recycler)));
         return headerData;
     }
 

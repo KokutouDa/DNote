@@ -16,6 +16,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Selection;
+import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -24,6 +25,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Checkable;
 import android.widget.EditText;
 
 import com.kokutouda.dnote.dnote.DialogErrorBinding;
@@ -78,31 +80,39 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
 
         //navigation view
-//        NavigationView navigationView = findViewById(R.id.nav_view);
-
+        //NavigationView navigationView = findViewById(R.id.nav_view);
 
         mCategoryNavAdapter = new CategoryNavAdapter(NavigationViewUtils.getHeaderData(mContext)
                 , NavigationViewUtils.getFooterData(mContext));
-        mCategoryView = findViewById(R.id.recyclerview_nav_categories);
-        mCategoryView.setLayoutManager(new LinearLayoutManager(this));
-        mCategoryView.setAdapter(mCategoryNavAdapter);
-        final SimpleOnItemTouchListener.OnItemClickListener itemClick = new SimpleOnItemTouchListener.OnItemClickListener() {
+        mCategoryNavAdapter.setItemClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(View v, int position) {
-                //todo cheakable=true or selected=true
+            public void onClick(View v) {
+                int position = mCategoryView.getChildAdapterPosition(v);
+                int oldPosition = mCategoryNavAdapter.getOldPosition();
+                if (oldPosition != -1) {
+                    RecyclerView.ViewHolder oldViewHolder = mCategoryView.findViewHolderForAdapterPosition(oldPosition);
+                    mCategoryNavAdapter.notifyItemChanged(position, oldViewHolder);
+                } else {
+                    mCategoryNavAdapter.notifyItemChanged(position, "any");
+                }
+
                 DrawerLayout drawer = findViewById(R.id.drawer_layout);
                 drawer.closeDrawer(GravityCompat.START);
             }
-        };
-        SimpleOnItemTouchListener.OnItemLongClickListener itemLongClick = new SimpleOnItemTouchListener.OnItemLongClickListener() {
+        });
+        mCategoryNavAdapter.setItemLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onItemLongClick(View itemView, int position) {
-
-                createDialogEditCategory(itemView, position);
-
+            public boolean onLongClick(View v) {
+                int position = mCategoryView.getChildAdapterPosition(v);
+                createDialogEditCategory(position);
+                return true;
             }
-        };
-        mCategoryView.addOnItemTouchListener(new SimpleOnItemTouchListener(mContext, mCategoryView, itemClick, itemLongClick));
+        });
+
+        mCategoryView = findViewById(R.id.recyclerview_nav_categories);
+        mCategoryView.setLayoutManager(new LinearLayoutManager(this));
+        mCategoryView.setAdapter(mCategoryNavAdapter);
+
         mCategoryModel = ViewModelProviders.of(this).get(CategoryListViewModel.class);
         mCategoryModel.getCategory().observe(this, new Observer<List<Category>>() {
             @Override
@@ -202,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, NotesActivity.ADD_NOTES_REQUEST);
     }
 
-    private void createDialogEditCategory(View itemView, final int position) {
+    private void createDialogEditCategory(final int position) {
         final View viewDialogEdit = getLayoutInflater().inflate(R.layout.dialog_category_edit, null);
         final Category category = mCategoryNavAdapter.getItemByLayoutPosition(position);
         final EditText editText = viewDialogEdit.findViewById(R.id.edit_dialog);
@@ -217,7 +227,8 @@ public class MainActivity extends AppCompatActivity {
         });
         alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.all_cancel), new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) { }
+            public void onClick(DialogInterface dialog, int which) {
+            }
         });
         alertDialog.show();
     }

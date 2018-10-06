@@ -15,9 +15,7 @@ public class SimpleOnItemTouchListener implements RecyclerView.OnItemTouchListen
     private OnItemLongClickListener mLongClickListener;
     private GestureDetector mGestureDetector;
     private RecyclerView mRecyclerView;
-    private boolean mIsLongClick = false;
     //长按时选中的View
-    private View mViewOnLongClick;
 
 
     public interface OnItemClickListener {
@@ -35,21 +33,14 @@ public class SimpleOnItemTouchListener implements RecyclerView.OnItemTouchListen
         mGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
-                mIsLongClick = false;
                 return true;
             }
 
             @Override
             public void onLongPress(MotionEvent e) {
                 View itemView = recyclerView.findChildViewUnder(e.getX(), e.getY());
-                int position = recyclerView.getChildLayoutPosition(itemView);
-                int viewType = mRecyclerView.getAdapter().getItemViewType(position);
-                if (viewType == VIEW_TYPE_MAIN) {
-                    mLongClickListener.onItemLongClick(itemView, position);
-                } else {
-                    mIsLongClick = true;
-                    mViewOnLongClick = itemView;
-                }
+                int position = recyclerView.getChildAdapterPosition(itemView);
+                mLongClickListener.onItemLongClick(itemView, position);
             }
         });
     }
@@ -57,17 +48,10 @@ public class SimpleOnItemTouchListener implements RecyclerView.OnItemTouchListen
     @Override
     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
         View itemView = rv.findChildViewUnder(e.getX(), e.getY());
+
         if (mClickListener != null && itemView != null && mGestureDetector.onTouchEvent(e)) {
-            int position = rv.getChildLayoutPosition(itemView);
+            int position = mRecyclerView.getChildAdapterPosition(itemView);
             mClickListener.onItemClick(itemView, position);
-            return true;
-        }
-        if (mLongClickListener != null && itemView != null && mIsLongClick && e.getAction() == MotionEvent.ACTION_UP) {
-            mIsLongClick = false;
-            if (mViewOnLongClick == itemView) {
-                int position = mRecyclerView.getChildLayoutPosition(itemView);
-                mClickListener.onItemClick(itemView, position);
-            }
             return true;
         }
         return false;
