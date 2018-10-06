@@ -11,6 +11,7 @@ import android.databinding.ObservableField;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
 
         //navigation view
-        //NavigationView navigationView = findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
 
         mCategoryNavAdapter = new CategoryNavAdapter(NavigationViewUtils.getHeaderData(mContext)
                 , NavigationViewUtils.getFooterData(mContext));

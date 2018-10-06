@@ -74,7 +74,6 @@ public class CategoryDialogAdapter extends BaseAdapter {
         ViewHolder viewHolder = new ViewHolder(convertView);
 
         Category item = (Category) getItem(position);
-        //todo 动态设置不同的分类颜色            viewHolder.imageIcon.setImageTintList();
         if (item != null) {
             viewHolder.textName.setText(item.name);
             viewHolder.textCount.setText(String.valueOf(item.count));

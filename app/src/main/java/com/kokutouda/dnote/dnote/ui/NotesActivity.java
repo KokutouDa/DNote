@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -33,7 +34,6 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
 
     private EditText mEditTextTitle;
     private EditText mEditTextContent;
-    private AlertDialog mDialogNewCategory;
 
     private Notes mExistedNotes;
     private CategoryListViewModel mCategoryModel;
@@ -142,7 +142,6 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
             removeFromCategory();
         } else if (which >= 0) {
             addToCategory(which);
-
         }
     }
 
@@ -161,14 +160,6 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
             }
         });
         alertDialog.show();
-    }
-
-    private boolean isDialogButtonClickable(AlertDialog dialog, int witchButton) {
-        return dialog.getButton(witchButton).isClickable();
-    }
-
-    private void setDialogButtonClickable(AlertDialog dialog, int witchButton, boolean clickable) {
-        dialog.getButton(witchButton).setClickable(clickable);
     }
 
     //笔记添加到分类中

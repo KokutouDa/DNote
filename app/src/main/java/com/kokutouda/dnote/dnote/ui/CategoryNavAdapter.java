@@ -124,7 +124,6 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
             if (isChecked()) {
                 Drawable drawable = DrawableCompat.wrap(imageIcon.getDrawable());
                 DrawableCompat.setTint(imageIcon.getDrawable(), itemView.getResources().getColor(R.color.colorPrimary));
-
                 textName.setTextColor(itemView.getResources().getColor(R.color.colorPrimary));
                 textName.setTypeface(null, Typeface.BOLD);
             } else {
