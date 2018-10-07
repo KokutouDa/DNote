@@ -3,8 +3,6 @@ package com.kokutouda.dnote.dnote.viewmodel;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.ViewModel;
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.kokutouda.dnote.dnote.db.Notes;
@@ -25,7 +23,15 @@ public class NotesListViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<Notes>> getAll() {
-        return this.mNotes;
+        return mNotes;
+    }
+
+    public void getAllTest(NotesRepository.NotesListCallback callback) {
+        mNotesRepository.getAll(callback);
+    }
+
+    public void getByCategory(int categoryId, NotesRepository.NotesListCallback callback) {
+        mNotesRepository.getByCategory(categoryId,callback);
     }
 
     public void insertNotes(Notes notes) {

@@ -123,7 +123,7 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
         public void setViewByChecked() {
             if (isChecked()) {
                 Drawable drawable = DrawableCompat.wrap(imageIcon.getDrawable());
-                DrawableCompat.setTint(imageIcon.getDrawable(), itemView.getResources().getColor(R.color.colorPrimary));
+                DrawableCompat.setTint(drawable, itemView.getResources().getColor(R.color.colorPrimary));
                 textName.setTextColor(itemView.getResources().getColor(R.color.colorPrimary));
                 textName.setTypeface(null, Typeface.BOLD);
             } else {
@@ -239,6 +239,11 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
 
     public int getFooterIndexFromPosition(int position) {
         return position - mHeaderData.size() - mCategoryList.size();
+    }
+
+    public Integer getCategoryId(int position) {
+        int index = getMainIndexFromPosition(position);
+        return mCategoryList.get(index).id;
     }
 
     @Override

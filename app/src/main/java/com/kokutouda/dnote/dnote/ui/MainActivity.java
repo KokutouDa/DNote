@@ -1,13 +1,12 @@
 package com.kokutouda.dnote.dnote.ui;
 
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.databinding.DataBindingUtil;
-import android.databinding.ObservableBoolean;
-import android.databinding.ObservableField;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -16,8 +15,6 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Selection;
-import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -26,13 +23,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Checkable;
 import android.widget.EditText;
 
-import com.kokutouda.dnote.dnote.DialogErrorBinding;
 import com.kokutouda.dnote.dnote.R;
 import com.kokutouda.dnote.dnote.db.Category;
 import com.kokutouda.dnote.dnote.db.Notes;
+import com.kokutouda.dnote.dnote.db.NotesRepository;
 import com.kokutouda.dnote.dnote.util.DialogUtil;
 import com.kokutouda.dnote.dnote.util.NavigationViewUtils;
 import com.kokutouda.dnote.dnote.viewmodel.CategoryListViewModel;
@@ -44,13 +40,15 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int POSITION_NEW_NOTES = -1;
 
-    private RecyclerView mRecyclerView;
+    private RecyclerView mNotesView;
     private Context mContext;
     private NotesAdapter mNotesAdapter;
     private NotesListViewModel mNotesModel;
     private CategoryListViewModel mCategoryModel;
     private RecyclerView mCategoryView;
     private CategoryNavAdapter mCategoryNavAdapter;
+    private Observer<List<Notes>> mNotesObserver;
+    private NotesRepository.NotesListCallback mNotesCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,42 +81,22 @@ public class MainActivity extends AppCompatActivity {
         //navigation view
         NavigationView navigationView = findViewById(R.id.nav_view);
 
-        mCategoryNavAdapter = new CategoryNavAdapter(NavigationViewUtils.getHeaderData(mContext)
-                , NavigationViewUtils.getFooterData(mContext));
-        mCategoryNavAdapter.setItemClickListener(new View.OnClickListener() {
+        final LifecycleOwner owner = this;
+        //Notes
+        mNotesObserver = new Observer<List<Notes>>() {
             @Override
-            public void onClick(View v) {
-                int position = mCategoryView.getChildAdapterPosition(v);
-                mCategoryNavAdapter.notifyItemChanged(position, "any");
-
-                DrawerLayout drawer = findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
+            public void onChanged(@Nullable List<Notes> notes) {
+                mNotesAdapter.setNotesList(notes);
             }
-        });
-        mCategoryNavAdapter.setItemLongClickListener(new View.OnLongClickListener() {
+        };
+        mNotesCallback = new NotesRepository.NotesListCallback() {
             @Override
-            public boolean onLongClick(View v) {
-                int position = mCategoryView.getChildAdapterPosition(v);
-                createDialogEditCategory(position);
-                return true;
+            public void callback(LiveData<List<Notes>> notesList) {
+                notesList.observe(owner, mNotesObserver);
             }
-        });
-
-        mCategoryView = findViewById(R.id.recyclerview_nav_categories);
-        mCategoryView.setLayoutManager(new LinearLayoutManager(this));
-        mCategoryView.setAdapter(mCategoryNavAdapter);
-
-        mCategoryModel = ViewModelProviders.of(this).get(CategoryListViewModel.class);
-        mCategoryModel.getCategory().observe(this, new Observer<List<Category>>() {
-            @Override
-            public void onChanged(@Nullable List<Category> categories) {
-                mCategoryNavAdapter.setCategoryList(categories);
-            }
-        });
-
-        //RecyclerView
-        mRecyclerView = findViewById(R.id.recyclerView);
-        mRecyclerView.addOnItemTouchListener(new SimpleOnItemTouchListener(this, mRecyclerView,
+        };
+        mNotesView = findViewById(R.id.recyclerView);
+        mNotesView.addOnItemTouchListener(new SimpleOnItemTouchListener(this, mNotesView,
                 new SimpleOnItemTouchListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View v, int position) {
@@ -132,15 +110,55 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }));
         mNotesModel = ViewModelProviders.of(this).get(NotesListViewModel.class);
-        mNotesModel.getAll().observe(this, new Observer<List<Notes>>() {
+        mNotesModel.getAll().observe(owner, mNotesObserver);
+        mNotesView.setLayoutManager(new LinearLayoutManager(mContext));
+        mNotesAdapter = new NotesAdapter();
+        mNotesView.setAdapter(mNotesAdapter);
+
+        //Category
+        mCategoryNavAdapter = new CategoryNavAdapter(NavigationViewUtils.getHeaderData(mContext)
+                , NavigationViewUtils.getFooterData(mContext));
+        mCategoryNavAdapter.setItemClickListener(new View.OnClickListener() {
             @Override
-            public void onChanged(@Nullable List<Notes> notes) {
-                mNotesAdapter.setNotesList(notes);
+            public void onClick(View v) {
+                int position = mCategoryView.getChildAdapterPosition(v);
+                switch (mCategoryNavAdapter.getItemViewType(position)) {
+                    case RecyclerViewType.VIEW_TYPE_MAIN:
+                        Integer categoryId = mCategoryNavAdapter.getCategoryId(position);
+                        mNotesModel.getByCategory(categoryId, mNotesCallback);
+                        break;
+                    case RecyclerViewType.VIEW_TYPE_HEADER:
+                        if (position == 0) {
+                            mNotesModel.getAllTest(mNotesCallback);
+                        }
+                        break;
+                    case RecyclerViewType.VIEW_TYPE_FOOTER:
+                        break;
+                }
+
+                mCategoryNavAdapter.notifyItemChanged(position, "any");
+                DrawerLayout drawer = findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.START);
             }
         });
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        mNotesAdapter = new NotesAdapter();
-        mRecyclerView.setAdapter(mNotesAdapter);
+        mCategoryNavAdapter.setItemLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                int position = mCategoryView.getChildAdapterPosition(v);
+                createDialogEditCategory(position);
+                return true;
+            }
+        });
+        mCategoryView = findViewById(R.id.recyclerview_nav_categories);
+        mCategoryView.setLayoutManager(new LinearLayoutManager(this));
+        mCategoryView.setAdapter(mCategoryNavAdapter);
+        mCategoryModel = ViewModelProviders.of(this).get(CategoryListViewModel.class);
+        mCategoryModel.getCategory().observe(owner, new Observer<List<Category>>() {
+            @Override
+            public void onChanged(@Nullable List<Category> categories) {
+                mCategoryNavAdapter.setCategoryList(categories);
+            }
+        });
     }
 
     @Override

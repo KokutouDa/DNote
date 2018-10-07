@@ -14,6 +14,7 @@ public class NotesRepository {
     private LiveData<List<Notes>> mAllNotes;
     private LiveData<List<Category>> mAllCategory;
     private NotesDao mNotesDao;
+    private LiveData<List<Notes>> mNote;
 
     public NotesRepository(Context applicationContext) {
         mNotesDao = NotesDatabase.getDatabase(applicationContext).noteDao();
@@ -23,6 +24,19 @@ public class NotesRepository {
 
     public LiveData<List<Notes>> getAll() {
         return mAllNotes;
+    }
+
+    public void getAll(final NotesListCallback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                callback.callback(mNotesDao.getAllNotes());
+            }
+        }).start();
+    }
+
+    public void getByCategory(int categoryId, NotesListCallback callback) {
+        new Thread(new GetNotesByCategoryRunnable(mNotesDao, categoryId, callback)).start();
     }
 
     public void insertNotes(Notes notes) {
@@ -47,6 +61,11 @@ public class NotesRepository {
 
     public void changeCategoryCount(Integer categoryId, int action) {
         new Thread(new ChangeCountRunnable(mNotesDao, categoryId, action)).start();
+    }
+
+    public interface NotesListCallback {
+
+        void callback(LiveData<List<Notes>> notesList);
     }
 
     private static class InsertNotesAsyncTask extends AsyncTask<Notes, Void, Void> {
@@ -127,4 +146,23 @@ public class NotesRepository {
             notesDao.updateCategory(category);
         }
     }
+
+    private class GetNotesByCategoryRunnable implements Runnable {
+        private Integer categoryId;
+        private NotesDao notesDao;
+        NotesListCallback callback;
+
+        GetNotesByCategoryRunnable(NotesDao notesDao, Integer categoryId, NotesListCallback callback) {
+            this.categoryId = categoryId;
+            this.notesDao = notesDao;
+            this.callback = callback;
+        }
+
+        @Override
+        public void run() {
+            callback.callback(notesDao.getNotesByCategory(categoryId));
+
+        }
+    }
+
 }

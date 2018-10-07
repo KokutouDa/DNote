@@ -23,14 +23,14 @@ public interface NotesDao {
     @Query("SELECT * FROM Notes WHERE delete_time == 0")
     LiveData<List<Notes>> getAllNotes();
 
+    @Query("SELECT * FROM Notes WHERE category_id == :categoryId")
+    LiveData<List<Notes>> getNotesByCategory(Integer categoryId);
+
     @Query("SELECT * FROM Notes WHERE delete_time != 0")
     LiveData<List<Notes>> getDeletedNotes();
 
     @Update
     void updateNotes(Notes... notes);
-
-    @Query("SELECT * FROM Notes WHERE id LIKE :categoryId")
-    LiveData<List<Notes>> getNotesByCategory(int categoryId);
 
     @Query("SELECT * FROM Category")
     LiveData<List<Category>> getAllCategory();
