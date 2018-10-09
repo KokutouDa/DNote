@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NotesRepository {
@@ -14,7 +15,6 @@ public class NotesRepository {
     private LiveData<List<Notes>> mAllNotes;
     private LiveData<List<Category>> mAllCategory;
     private NotesDao mNotesDao;
-    private LiveData<List<Notes>> mNote;
 
     public NotesRepository(Context applicationContext) {
         mNotesDao = NotesDatabase.getDatabase(applicationContext).noteDao();
@@ -39,13 +39,26 @@ public class NotesRepository {
         new Thread(new GetNotesByCategoryRunnable(mNotesDao, categoryId, callback)).start();
     }
 
-    public void insertNotes(Notes notes) {
+    public void insertNotesList(Notes... notes) {
         new InsertNotesAsyncTask(mNotesDao).execute(notes);
+    }
+
+    public void insertNotesSingle(final Notes notes, final IdCallback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long id = mNotesDao.insertNotesSingle(notes);
+                if (callback != null) {
+                    callback.callback(id);
+                }
+            }
+        }).start();
     }
 
     public void updateNotes(Notes notes) {
         new Thread(new UpdateNotesRunnable(mNotesDao, notes)).start();
     }
+
 
     public LiveData<List<Category>> getAllCategory() {
         return this.mAllCategory;
@@ -63,10 +76,72 @@ public class NotesRepository {
         new Thread(new ChangeCountRunnable(mNotesDao, categoryId, action)).start();
     }
 
-    public interface NotesListCallback {
 
+    public void insertAttachment(final Attachment... attachments) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mNotesDao.insertAttachment(attachments);
+            }
+        }).start();
+    }
+
+    public void deleteAttachment(final Attachment... attachments) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mNotesDao.deleteAttachment(attachments);
+            }
+        }).start();
+    }
+
+    public void updateAttachment(final Attachment... attachments) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mNotesDao.updateAttachment(attachments);
+            }
+        }).start();
+    }
+
+    public void getAttachmentByNotes(final Integer notesId, final AttachmentsCallback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                LiveData<List<Attachment>> data = mNotesDao.getAttachmentByNotesId(notesId);
+                callback.callback(data);
+            }
+        }).start();
+    }
+
+    public void getAttachmentNoNotesId(final AttachmentListCallback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                callback.callback(mNotesDao.getAttachmentNoNotesId());
+            }
+        }).start();
+    }
+
+
+
+    public interface IdCallback {
+        void callback(long notesId);
+    }
+
+    public interface NotesListCallback {
         void callback(LiveData<List<Notes>> notesList);
     }
+
+    public interface AttachmentsCallback {
+        void callback(LiveData<List<Attachment>> attachments);
+    }
+
+    public interface AttachmentListCallback {
+        void callback(List<Attachment> attachmentList);
+    }
+
+
 
     private static class InsertNotesAsyncTask extends AsyncTask<Notes, Void, Void> {
         private NotesDao notesDao;
@@ -77,7 +152,7 @@ public class NotesRepository {
 
         @Override
         protected Void doInBackground(Notes... notes) {
-            notesDao.insertNotes((Notes) notes[0]);
+            notesDao.insertNotesList((Notes) notes[0]);
             return null;
         }
     }

@@ -14,7 +14,7 @@ import com.kokutouda.dnote.dnote.DialogErrorBinding;
 import com.kokutouda.dnote.dnote.R;
 import com.kokutouda.dnote.dnote.ui.SimpleTextWatcher;
 
-public class DialogUtil {
+public class DialogUtils {
 
     public static AlertDialog createCategoryDialog(Context context, View view, @Nullable final String categoryName) {
         final DialogErrorBinding dialogErrorBinding = DataBindingUtil.bind(view);

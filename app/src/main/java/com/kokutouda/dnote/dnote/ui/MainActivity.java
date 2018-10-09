@@ -15,6 +15,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -26,10 +27,11 @@ import android.view.MenuItem;
 import android.widget.EditText;
 
 import com.kokutouda.dnote.dnote.R;
+import com.kokutouda.dnote.dnote.db.Attachment;
 import com.kokutouda.dnote.dnote.db.Category;
 import com.kokutouda.dnote.dnote.db.Notes;
 import com.kokutouda.dnote.dnote.db.NotesRepository;
-import com.kokutouda.dnote.dnote.util.DialogUtil;
+import com.kokutouda.dnote.dnote.util.DialogUtils;
 import com.kokutouda.dnote.dnote.util.NavigationViewUtils;
 import com.kokutouda.dnote.dnote.viewmodel.CategoryListViewModel;
 import com.kokutouda.dnote.dnote.viewmodel.NotesListViewModel;
@@ -37,6 +39,8 @@ import com.kokutouda.dnote.dnote.viewmodel.NotesListViewModel;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private final String TAG = "MainActivity";
 
     public static final int POSITION_NEW_NOTES = -1;
 
@@ -129,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case RecyclerViewType.VIEW_TYPE_HEADER:
                         if (position == 0) {
-                            mNotesModel.getAllTest(mNotesCallback);
+                            mNotesModel.getAll(mNotesCallback);
                         }
                         break;
                     case RecyclerViewType.VIEW_TYPE_FOOTER:
@@ -163,12 +167,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
-        if (requestCode == NotesActivity.ADD_NOTES_REQUEST) {
+        if (requestCode == NotesActivity.REQUEST_ADD_NOTES) {
             if (resultCode == RESULT_OK) {
-                Notes notes = (Notes) data.getSerializableExtra("notes");
+                Notes notes = (Notes) data.getSerializableExtra(NotesActivity.KEY_NOTES);
 
                 if (notes.id == null) {
-                    mNotesModel.insertNotes(notes);
+                    mNotesModel.insertNotesSingle(notes);
                 } else {
                     mNotesModel.updateNotes(notes);
                 }
@@ -222,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
             Notes note = mNotesAdapter.getItem(position);
             intent.putExtra(NotesActivity.KEY_NOTES, note);
         }
-        startActivityForResult(intent, NotesActivity.ADD_NOTES_REQUEST);
+        startActivityForResult(intent, NotesActivity.REQUEST_ADD_NOTES);
     }
 
     private void createDialogEditCategory(final int position) {
@@ -230,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
         final Category category = mCategoryNavAdapter.getItemByLayoutPosition(position);
         final EditText editText = viewDialogEdit.findViewById(R.id.edit_dialog);
 
-        AlertDialog alertDialog = DialogUtil.createCategoryDialog(this, viewDialogEdit, category.name);
+        AlertDialog alertDialog = DialogUtils.createCategoryDialog(this, viewDialogEdit, category.name);
         alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_confirm), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

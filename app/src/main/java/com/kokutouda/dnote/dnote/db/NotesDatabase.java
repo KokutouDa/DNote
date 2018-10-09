@@ -6,7 +6,7 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
 
-@Database(entities = {Notes.class, Category.class}, version = 1)
+@Database(entities = {Notes.class, Category.class, Attachment.class}, version = 1)
 public abstract class NotesDatabase extends RoomDatabase {
     public static String DB_NAME = "notes";
 

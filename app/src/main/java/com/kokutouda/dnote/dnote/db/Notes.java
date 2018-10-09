@@ -23,13 +23,13 @@ public class Notes implements Serializable{
     public Integer categoryId;
 
     @ColumnInfo(name = "create_time")
-    public long createTime;
+    public Long createTime;
 
     @ColumnInfo(name = "update_time")
-    public long updateTime;
+    public Long updateTime;
 
     @ColumnInfo(name = "delete_time")
-    public long deleteTime;
+    public Long deleteTime;
 
     public Notes(String title, String content) {
         this.title = title;
