@@ -22,8 +22,15 @@ public class AttachmentAdapter extends BaseAdapter {
 
     private List<Attachment> mAttachments;
 
+    private int mNumColumns;
 
-    public AttachmentAdapter() { }
+
+    public AttachmentAdapter(int numColumns) {
+        mNumColumns = numColumns;
+        if (mNumColumns < 1) {
+            mNumColumns = 1;
+        }
+    }
 
     @Override
     public int getCount() {
@@ -50,22 +57,29 @@ public class AttachmentAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
         if (convertView == null) {
-            //todo 一列转两列的时候有个显示上的bug
-            Context context = parent.getContext();
-            imageView = new ImageView(context);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(
+                    R.layout.item_grid_view, parent, false);
+            ViewHolder holder = new ViewHolder(convertView);
             String fileName = mAttachments.get(position).fileName;
-            Bitmap bitmap = BitmapUtils.getBitmap(context, fileName);
-
-            int width = parent.getWidth() / 2;
-            imageView.setLayoutParams(new ViewGroup.LayoutParams(width, width));
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setImageBitmap(bitmap);
-
-        } else {
-            imageView = (ImageView) convertView;
+            Bitmap bitmap = BitmapUtils.getBitmap(fileName);
+            holder.imageView.setImageBitmap(bitmap);
         }
-        return imageView;
+        ViewGroup.LayoutParams layoutParams = convertView.getLayoutParams();
+        layoutParams.height = parent.getMeasuredWidth() / mNumColumns;
+        convertView.setLayoutParams(layoutParams);
+        return convertView;
+    }
+
+    public void setNumColumns(int numColumns) {
+        this.mNumColumns = numColumns;
+    }
+
+    public class ViewHolder {
+        ImageView imageView;
+
+        public ViewHolder(View itemView) {
+            imageView = itemView.findViewById(R.id.image_grid_view);
+        }
     }
 }

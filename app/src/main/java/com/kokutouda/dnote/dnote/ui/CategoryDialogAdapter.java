@@ -70,14 +70,15 @@ public class CategoryDialogAdapter extends BaseAdapter {
     private @NonNull View createViewFromResource(@Nullable View convertView, @NonNull ViewGroup parent, int position, int resource) {
         if (convertView == null) {
             convertView = LayoutInflater.from(mContext).inflate(resource, parent, false);
-        }
-        ViewHolder viewHolder = new ViewHolder(convertView);
+            ViewHolder viewHolder = new ViewHolder(convertView);
 
-        Category item = (Category) getItem(position);
-        if (item != null) {
-            viewHolder.textName.setText(item.name);
-            viewHolder.textCount.setText(String.valueOf(item.count));
+            Category item = (Category) getItem(position);
+            if (item != null) {
+                viewHolder.textName.setText(item.name);
+                viewHolder.textCount.setText(String.valueOf(item.count));
+            }
         }
+
         return convertView;
     }
 }

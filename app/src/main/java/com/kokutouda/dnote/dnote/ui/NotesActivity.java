@@ -6,13 +6,14 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,16 +30,20 @@ import com.kokutouda.dnote.dnote.util.DialogUtils;
 import com.kokutouda.dnote.dnote.viewmodel.AttachmentViewModel;
 import com.kokutouda.dnote.dnote.viewmodel.CategoryListViewModel;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class NotesActivity extends AppCompatActivity implements DialogInterface.OnClickListener {
 
+    private static final String TAG = "NotesActivity";
+
+    private static final String AUTHORITY_IMAGE = "com.kokutouda.dnote.fileprovider";
+
     public static final int REQUEST_ADD_NOTES = 999;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
 
-    public static final String KEY_NOTES = "notes";
-    public static final String KEY_ATTACHMENT = "attachment";
+    public static final String KEY_NOTES = "com.kokutouda.dnote.dnote.Notes";
 
     private EditText mEditTextTitle;
     private EditText mEditTextContent;
@@ -47,10 +52,13 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
     private GridView mGridView;
     private AttachmentAdapter mAttachmentAdapter;
     private AttachmentViewModel mAttachmentModel;
+    private String mCurrentImagePath;
 
     private CategoryListViewModel mCategoryModel;
     private CategoryDialogAdapter mCategoryAdapter;
     private Integer mCategoryId;
+
+
 
 
     @Override
@@ -75,16 +83,20 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
         mEditTextContent = findViewById(R.id.edit_content);
         mGridView = findViewById(R.id.grid_view);
 
-        mAttachmentAdapter = new AttachmentAdapter();
+        mAttachmentAdapter = new AttachmentAdapter(1);
         mGridView.setAdapter(mAttachmentAdapter);
         mAttachmentModel = new AttachmentViewModel(getApplication());
-        final NotesRepository.AttachmentsCallback attachmentCallback = new NotesRepository.AttachmentsCallback() {
+        NotesRepository.AttachmentsCallback attachmentCallback = new NotesRepository.AttachmentsCallback() {
             @Override
             public void callback(LiveData<List<Attachment>> attachments) {
                 attachments.observe(owner, new Observer<List<Attachment>>() {
                     @Override
                     public void onChanged(@Nullable List<Attachment> attachments) {
                         mAttachmentAdapter.setAttachments(attachments);
+                        if (attachments.size() > 1) {
+                            mGridView.setNumColumns(2);
+                            mAttachmentAdapter.setNumColumns(2);
+                        }
                     }
                 });
             }
@@ -100,13 +112,6 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
         } else {
             mAttachmentModel.getAttachmentByNotes(null, attachmentCallback);
         }
-        //todo 新的笔记只有在插入的时候才有notesId的。
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mGridView.invalidate();
     }
 
     @Override
@@ -142,17 +147,11 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
             case R.id.menu_notes_tag:
                 return true;
             case R.id.menu_notes_attachment:
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)
-                        && takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                }
+                dispatchTakePictureIntent();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-
         }
-
     }
 
     private void setNotesResult() {
@@ -170,10 +169,6 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
             }
             mExistedNotes.categoryId = mCategoryId;
             intent.putExtra(KEY_NOTES, mExistedNotes);
-
-//            if (mAttachmentAdapter.getCount() != 0) {
-//                intent.putExtra(KEY_ATTACHMENT, mAttachmentAdapter.getAttachments());
-//            }
             setResult(RESULT_OK, intent);
         }
     }
@@ -191,6 +186,25 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
             removeFromCategory();
         } else if (which >= 0) {
             addToCategory(which);
+        }
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            File imageFile = null;
+            try {
+                imageFile = BitmapUtils.createImageFiles(this);
+                mCurrentImagePath = imageFile.getAbsolutePath();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (imageFile != null) {
+                Uri fileUri = FileProvider.getUriForFile(this,
+                        AUTHORITY_IMAGE, imageFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
         }
     }
 
@@ -221,7 +235,6 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
                 }
             } else {
                 mCategoryModel.changeCategory(null, category.id);
-
             }
             mCategoryId = category.id;
         }
@@ -236,14 +249,12 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, mCurrentImagePath);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle bundle = data.getExtras();
-            Bitmap image = (Bitmap) bundle.get("data");
-            String fileName = BitmapUtils.saveImage(this, image);
             if (mExistedNotes != null) {
-                mAttachmentModel.insertAttachment(new Attachment(fileName, mExistedNotes.id));
+                mAttachmentModel.insertAttachment(new Attachment(mCurrentImagePath, mExistedNotes.id));
             } else {
-                mAttachmentModel.insertAttachment(new Attachment(fileName));
+                mAttachmentModel.insertAttachment(new Attachment(mCurrentImagePath));
             }
         }
     }
