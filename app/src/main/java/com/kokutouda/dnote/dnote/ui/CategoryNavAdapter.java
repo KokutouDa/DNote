@@ -233,10 +233,12 @@ public class CategoryNavAdapter extends RecyclerView.Adapter {
         }
     }
 
+    //主数据 Item
     public int getMainIndexFromPosition(int position) {
         return position - mHeaderData.size();
     }
 
+    //底部数据 Item
     public int getFooterIndexFromPosition(int position) {
         return position - mHeaderData.size() - mCategoryList.size();
     }

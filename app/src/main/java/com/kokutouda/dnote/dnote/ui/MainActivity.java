@@ -44,15 +44,20 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int POSITION_NEW_NOTES = -1;
 
-    private RecyclerView mNotesView;
     private Context mContext;
+
+    //Notes
+    private RecyclerView mNotesView;
     private NotesAdapter mNotesAdapter;
     private NotesListViewModel mNotesModel;
+    private Observer<List<Notes>> mNotesObserver;
+    private NotesRepository.NotesListCallback mNotesCallback;
+
+    //Category
     private CategoryListViewModel mCategoryModel;
     private RecyclerView mCategoryView;
     private CategoryNavAdapter mCategoryNavAdapter;
-    private Observer<List<Notes>> mNotesObserver;
-    private NotesRepository.NotesListCallback mNotesCallback;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -217,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * 查看笔记
      * @param position -1时表示新数据
      */
     private void startNotesAtyForResult(int position) {
@@ -229,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, NotesActivity.REQUEST_ADD_NOTES);
     }
 
+    //修改分类
     private void createDialogEditCategory(final int position) {
         final View viewDialogEdit = getLayoutInflater().inflate(R.layout.dialog_category_edit, null);
         final Category category = mCategoryNavAdapter.getItemByLayoutPosition(position);

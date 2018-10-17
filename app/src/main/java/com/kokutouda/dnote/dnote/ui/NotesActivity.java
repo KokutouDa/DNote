@@ -154,6 +154,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
         }
     }
 
+    //回传给 Aty 的结果
     private void setNotesResult() {
         String title = mEditTextTitle.getText().toString();
         String content = mEditTextContent.getText().toString();
@@ -173,6 +174,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
         }
     }
 
+    //没有写笔记
     private boolean isNotContent() {
         return (mEditTextTitle.getText().toString().equals("") &&
                 mEditTextContent.getText().toString().equals("") && mAttachmentAdapter.getCount() == 0);
@@ -189,6 +191,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
         }
     }
 
+    //拍照
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -208,6 +211,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
         }
     }
 
+    //创建分类
     private void createDialogNewCategory() {
         final View viewDialogEdit = getLayoutInflater().inflate(R.layout.dialog_category_edit, null);
         AlertDialog alertDialog = DialogUtils.createCategoryDialog(this, viewDialogEdit, null);
@@ -240,6 +244,7 @@ public class NotesActivity extends AppCompatActivity implements DialogInterface.
         }
     }
 
+    //删除分类
     private void removeFromCategory() {
         if (mCategoryId != null) {
             mCategoryModel.changeCategory(mCategoryId, null);

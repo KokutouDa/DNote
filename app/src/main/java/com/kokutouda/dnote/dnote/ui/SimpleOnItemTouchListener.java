@@ -15,7 +15,6 @@ public class SimpleOnItemTouchListener implements RecyclerView.OnItemTouchListen
     private OnItemLongClickListener mLongClickListener;
     private GestureDetector mGestureDetector;
     private RecyclerView mRecyclerView;
-    //长按时选中的View
 
 
     public interface OnItemClickListener {
